@@ -20,17 +20,21 @@ let draw_cell (c : Types.cell * int * int) =
 
 let draw_tile (t : Types.tile) (x : int) (y : int) =
   Graphics.moveto (x*cell_width) (y*cell_height);
-  List.map draw_cell t
+  List.iter draw_cell t;
 ;;
 
 let draw_configuration (config : Types.configuration) =
-  List.map (fun (a,b,c) -> draw_tile a b c) config
+  List.iter (fun (a,b,c) -> draw_tile a b c) config;
 ;;
 
-Graphics.open_graph ":0.0";; (* change this later *)
-let config =
-  [([(0xFF0000, 0, 0)], 0, 0);
-   ([(0x00FF00, 0, 0)], 1, 0)
-  ];;
-draw_configuration config;;
-Unix.sleep 3;;
+try 
+  begin
+  let display = Unix.getenv "DISPLAY" in
+  Graphics.open_graph display;
+  let config =
+    [([(0xFF0000, 0, 0)], 0, 0)
+    ;([(0x00FF00, 0, 0)], 1, 0)] in
+  draw_configuration config;
+  Unix.sleep 3;
+  end
+with _ -> print_endline "No display"
