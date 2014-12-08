@@ -2,8 +2,8 @@ open Types;;
 
 let string_of_cell cell =
   match cell with
-  | Empty
-  | Missing -> "."
+  | Empty -> "."
+  | Missing -> "#"
   | Filled(i) -> "x"
 ;;
 
@@ -17,4 +17,8 @@ let string_of_tile (tile : Types.tile) =
     ) "" row in
     acc ^ "\n" ^ row_str
   ) "" chars
+;;
+
+let print_coordinates i j indent = 
+  print_endline (indent^"(i,j)="^"("^(string_of_int i)^","^(string_of_int j)^")")
 ;;

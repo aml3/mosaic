@@ -25,7 +25,8 @@ let valid_placement (tile : Types.tile)
         | _ -> ()
       done
     done; true end
-  with Invalid_placement -> false
+  with Invalid_placement 
+       | Invalid_argument(_) (* Fell off the board. *) -> false
 ;;
 
 (* Repeatedly apply a function f n times to an argument x. *)
@@ -36,8 +37,7 @@ let rotate_tile_cw (tile : Types.tile) =
   let Tile(tile) = tile in
   let orig_y = Array.length tile in
   let orig_x = Array.fold_left (fun acc r -> max (Array.length r) acc) 0 tile in
-  let default_cell = Empty in
-  let rotated_tile = Array.make_matrix orig_x orig_y default_cell in
+  let rotated_tile = Array.make_matrix orig_x orig_y Empty in
   for i = 0 to (Array.length rotated_tile) - 1 do
     let rotated_row = rotated_tile.(i) in
     for j = 0 to (Array.length rotated_row) - 1 do
@@ -57,28 +57,25 @@ let place_tile (tile : Types.tile)
                (board : Types.board) =
   let Tile(tile) = tile in
   let Board(board) = board in
-  (* This may not be a deep copy. So, if things fail, check here. *)
-  let board = Array.copy board in (* Copy. Arrays are modified in place. *)
+  let deep_copy = Array.map (fun row -> Array.copy row) in
+  let new_board = deep_copy board in (* Copy. Arrays are modified in place. *)
   for i = 0 to (Array.length tile) - 1 do
     let tile_row = tile.(i) in
-    let board_row = board.(i) in
+    let new_board_row = new_board.(i) in
     for j = 0 to (Array.length tile_row) - 1 do
-      board_row.(j) <- tile_row.(j)
+      new_board_row.(j) <- tile_row.(j)
     done
   done;
-  Board(board)
+  Board(new_board)
 ;;
 
 exception Found_solution of Types.configuration;;
-let rec brute_force (partial_solution : Types.configuration) = 
-  print_endline "a";
+let rec brute_force (partial_solution : Types.configuration) (indent : string) = 
   let Configuration(remaining_tiles, Board(board)) = partial_solution in
   match remaining_tiles with
   | [] -> (true, partial_solution)
   | hd :: tl ->
-    print_endline ("hd="^(string_of_tile hd));
     try for n = 0 to 3 do
-      print_endline ("n="^(string_of_int n));
       let rotated_tile = repeat rotate_tile_cw hd n in
       (* For now, just check every single spot. *)
       for i = 0 to (Array.length board) - 1 do
@@ -86,9 +83,9 @@ let rec brute_force (partial_solution : Types.configuration) =
         for j = 0 to (Array.length row) - 1 do
           if valid_placement rotated_tile j i (Board board)
           then begin
-            let new_board = place_tile rotated_tile j i (Board board) in
-            let new_config = Configuration(tl, new_board) in
-            let (result, returned_solution) = brute_force new_config in
+            let Board(new_board) = place_tile rotated_tile j i (Board board) in
+            let new_config = Configuration(tl, Board(new_board)) in
+            let (result, returned_solution) = brute_force new_config (indent^"\t") in
             match result with
             | true -> raise (Found_solution returned_solution)
             | false -> ()
@@ -102,5 +99,5 @@ let rec brute_force (partial_solution : Types.configuration) =
 ;;
 
 let solve (blank_config : Types.configuration) =
-  brute_force blank_config
+  brute_force blank_config ""
 ;;
