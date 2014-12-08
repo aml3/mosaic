@@ -9,8 +9,8 @@ type cell = int;;
  *)
 type tile = cell array array;;
 
-(*We represent a board as a nxm matrix of cells *)
-type board = cell array array;;
+(* A board is the largest tile *)
+type board = tile;;
 
 (*
  * We represent a configuration by a partially filled board and a list of available
