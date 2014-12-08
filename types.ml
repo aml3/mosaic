@@ -10,7 +10,7 @@ type cell = Cell of int option;;
 type tile = Tile of cell array array;;
 
 (*We represent a board as a nxm matrix of cells *)
-type board = Board of tile;;
+type board = Board of cell array array;;
 
 (*
  * We represent a configuration by a partially filled board and a list of available
