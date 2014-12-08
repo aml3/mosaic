@@ -1,4 +1,3 @@
-open Unix;;
 (* Type definitions *)
 
 (* We represent a cell by its color. cells with None are empty. *)

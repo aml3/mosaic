@@ -1,21 +1,22 @@
 OCAMLC					= ocamlc
 OCAMLFIND				= ocamlfind
-FINDLIBFLAGS		= -package batteries,graphics -linkpkg
-CMOFILES				= types.cmo parse.cmo display.cmo solve.cmo
-%.cmo : %.ml
-	$(OCAMLFIND) $(OCAMLC) $(FINDLIBFLAGS) $<
+FINDLIBFLAGS		= -package batteries,graphics -linkpkg -verbose
+CMOFILES				= types.cmo display.cmo parse.cmo solve.cmo utils.cmo main.cmo
 
-main.cmo: main.ml $(CMOFILES)
-	$(OCAMLFIND) $(OCAMLC) $(FINDLIBFLAGS) -o mosaic $(CMOFILES) main.ml
+%.cmo : %.ml
+	$(OCAMLFIND) $(OCAMLC) -c $(FINDLIBFLAGS) $<
+
+main: $(CMOFILES)
+	$(OCAMLFIND) $(OCAMLC) $(FINDLIBFLAGS) -o main $(CMOFILES)
 
 parser: parse.ml
 	$(OCAMLFIND) $(OCAMLC) $(FINDLIBFLAGS) -o parser types.ml parse.ml
 
 display: display.ml
-	$(OCAMLC) -o display graphics.cma types.ml parse.ml display.ml
+	$(OCAMLC) -o display unix.cma graphics.cma types.ml display.ml
 
-solve: solve.ml
-	$(OCAMLC) -o solve types.ml solve.ml
+solver: solve.ml
+	$(OCAMLC) -o solver types.ml solve.ml
 
 clean:
-	rm -f parser display solve mosaic *.cmi *.cmo
+	rm -f main parser display solver *.cmi *.cmo

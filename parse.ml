@@ -95,7 +95,7 @@ let parse_grid (raw_grid : char array array) : ((tile list) * board) =
     in
   (* Get the separate shapes *)
   let tile_arrays = List.map
-    (fun (start, finish) -> Array.sub trans_grid (start + 1) (finish - start))
+    (fun (start, finish) -> Array.sub trans_grid (start + 1) (finish - start - 1))
     bounds
     in
   (* Make tiles *)
