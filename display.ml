@@ -19,7 +19,7 @@ let draw_configuration (config : Types.configuration) =
       Graphics.moveto (j*cell_width) (i*cell_height);
       let curr_x = Graphics.current_x () in
       let curr_y = Graphics.current_y () in
-      let Cell(color) = row.(j) in 
+      let Cell(color) = row.(j) in
       begin match color with
         | Some(color) -> Graphics.set_color color;
         | None -> Graphics.set_color background;
@@ -32,7 +32,7 @@ let draw_configuration (config : Types.configuration) =
 ;;
 
 let draw () =
-  try 
+  try
     let display = Unix.getenv "DISPLAY" in
     Graphics.open_graph display;
     let default_cell = Cell(None) in
@@ -51,4 +51,4 @@ let draw () =
   with Not_found -> prerr_endline "Error: No display"
 ;;
 
-draw ();;
+(* draw ();; *)
