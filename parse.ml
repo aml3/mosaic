@@ -36,24 +36,24 @@ let transpose (grid : char array array) : char array array =
   ;;
 
 (* Utility function to ensure unique coloring *)
-let update_colors (colors : (char, int option) Hashtbl.t) (new_elem : char) =
+let update_colors (colors : (char, Types.cell) Hashtbl.t) (new_elem : char) =
   let (r, g, b) = (Random.int 256, Random.int 256, Random.int 256) in
   let color = (r lsl 16) + (g lsl 8) + b in
-  Hashtbl.add colors new_elem (Some color);
+  Hashtbl.add colors new_elem (Filled(color));
   ;;
 
 (* Utility function to make an individual tile *)
-let make_tile (shape : char array array) (colors : (char, int option) Hashtbl.t) : (tile * ((char, int option) Hashtbl.t)) =
-  let result = Array.make (Array.length shape) (Array.make 0 (Cell (Some 0))) in
+let make_tile (shape : char array array) (colors : (char, Types.cell) Hashtbl.t) : (tile * ((char, Types.cell) Hashtbl.t)) =
+  let result = Array.make (Array.length shape) (Array.make 0 (Filled 0)) in
   Array.iteri
     ( fun idx elem ->
-          ( let row = Array.make (Array.length elem) (Cell (Some 0)) in
+          ( let row = Array.make (Array.length elem) (Filled 0) in
             Array.iteri
               ( fun r_idx r_elem -> Array.set
                     row r_idx
                     (( if not (Hashtbl.mem colors r_elem)
                        then update_colors colors r_elem);
-                     Cell (Hashtbl.find colors r_elem)))
+                     (Hashtbl.find colors r_elem)))
               elem;
             Array.set result idx row;))
   shape;
@@ -61,7 +61,7 @@ let make_tile (shape : char array array) (colors : (char, int option) Hashtbl.t)
   ;;
 
 (* Utility function to make tiles from the list of arrays. Mostly just mapping chars to ints *)
-let rec make_tiles (shapes : char array array list) (colors : (char, int option) Hashtbl.t) : tile list =
+let rec make_tiles (shapes : char array array list) (colors : (char, Types.cell) Hashtbl.t) : tile list =
   match shapes with
   | shape :: rest ->
     ( let (new_tile, colors) = make_tile shape colors in
@@ -101,7 +101,7 @@ let parse_grid (raw_grid : char array array) : ((tile list) * board) =
     in
   (* Make tiles *)
   let color_table = Hashtbl.create 20 in
-  Hashtbl.add color_table '.' (None);
+  Hashtbl.add color_table '.' Empty;
   let tile_set = make_tiles tile_arrays color_table in
   let dimensions = List.map
     (fun (Tile elem) -> Array.fold_left (fun acc r_elem -> acc + (Array.length r_elem)) 0 elem)

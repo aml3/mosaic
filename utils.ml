@@ -1,10 +1,10 @@
 open Types;;
 
-let string_of_cell opt =
-  let Cell(opt) = opt in
-  match opt with
-  | None -> "."
-  | Some(i) -> "x"
+let string_of_cell cell =
+  match cell with
+  | Empty
+  | Missing -> "."
+  | Filled(i) -> "x"
 ;;
 
 let string_of_tile (tile : Types.tile) = 

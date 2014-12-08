@@ -1,7 +1,7 @@
 (* Type definitions *)
 
 (* We represent a cell by its color. cells with None are empty. *)
-type cell = Cell of int option;;
+type cell = Empty | Missing | Filled of int;;
 
 (*
  * We represent a tile by a grid of cells. If a cell isn't actually part of a tile,

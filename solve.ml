@@ -1,4 +1,5 @@
 open Types;;
+open Utils;;
 
 (*
  * Loop over the tile and check to make sure each of its filled in cells
@@ -16,10 +17,11 @@ let valid_placement (tile : Types.tile)
     for i = 0 to (Array.length grid) - 1 do
       let tile_row = grid.(i) in
       for j = 0 to (Array.length tile_row) - 1 do
-        let Cell(tile_cell) = tile_row.(j) in
-        let Cell(board_cell) = (board.(i + y)).(j + x) in
+        let tile_cell = tile_row.(j) in
+        let board_cell = (board.(i + y)).(j + x) in
         match (tile_cell, board_cell) with
-        | (Some(_), Some(_)) -> raise Invalid_placement
+        | (Filled _, Filled _) 
+        | (Filled _, Missing) -> raise Invalid_placement
         | _ -> ()
       done
     done; true end
@@ -34,7 +36,7 @@ let rotate_tile_cw (tile : Types.tile) =
   let Tile(tile) = tile in
   let orig_y = Array.length tile in
   let orig_x = Array.fold_left (fun acc r -> max (Array.length r) acc) 0 tile in
-  let default_cell = Cell(None) in
+  let default_cell = Empty in
   let rotated_tile = Array.make_matrix orig_x orig_y default_cell in
   for i = 0 to (Array.length rotated_tile) - 1 do
     let rotated_row = rotated_tile.(i) in
@@ -69,11 +71,14 @@ let place_tile (tile : Types.tile)
 
 exception Found_solution of Types.configuration;;
 let rec brute_force (partial_solution : Types.configuration) = 
+  print_endline "a";
   let Configuration(remaining_tiles, Board(board)) = partial_solution in
   match remaining_tiles with
   | [] -> (true, partial_solution)
   | hd :: tl ->
+    print_endline ("hd="^(string_of_tile hd));
     try for n = 0 to 3 do
+      print_endline ("n="^(string_of_int n));
       let rotated_tile = repeat rotate_tile_cw hd n in
       (* For now, just check every single spot. *)
       for i = 0 to (Array.length board) - 1 do
@@ -94,4 +99,8 @@ let rec brute_force (partial_solution : Types.configuration) =
     (* If we reach here, then we couldn't place a tile. *)
     (false, partial_solution)
     with Found_solution solution -> (true, solution)
+;;
+
+let solve (blank_config : Types.configuration) =
+  brute_force blank_config
 ;;

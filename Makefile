@@ -1,7 +1,7 @@
 OCAMLC					= ocamlc
 OCAMLFIND				= ocamlfind
 FINDLIBFLAGS		= -package batteries,graphics -linkpkg -verbose
-CMOFILES				= types.cmo display.cmo parse.cmo solve.cmo utils.cmo main.cmo
+CMOFILES				= types.cmo utils.cmo display.cmo parse.cmo solve.cmo main.cmo
 
 %.cmo : %.ml
 	$(OCAMLFIND) $(OCAMLC) -c $(FINDLIBFLAGS) $<
