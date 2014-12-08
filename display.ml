@@ -11,9 +11,8 @@ let draw_board (board : Types.board) =
   let Board(board) = board in
   (* Loop over each cell in the board. Maybe there's a more OCaml-esq way to do
    * this. *)
-  for i = 0 to (Array.length board) - 1 do
-    let row = board.(i) in
-    for j = 0 to (Array.length row) - 1 do
+  Array.iteri (fun i row ->
+    Array.iteri (fun j _ ->
       (* Move the cursor to the appropriate place. We're going to assume that
        * the board begins at (0,0). If this changes in the future, then we can
        * use Graphics.rmoveto instead. *)
@@ -29,8 +28,8 @@ let draw_board (board : Types.board) =
       Graphics.fill_rect curr_x curr_y cell_width cell_height; (* Fill *)
       Graphics.set_color Graphics.black;
       Graphics.draw_rect curr_x curr_y cell_width cell_height; (* Border *)
-    done;
-  done
+    ) row
+  ) board
 ;;
 
 let draw_configuration (config : Types.configuration) =
