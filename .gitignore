@@ -9,3 +9,7 @@
 *.cmxa
 gfxi
 a.out
+solver
+parser
+display
+main

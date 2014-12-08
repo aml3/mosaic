@@ -6,13 +6,14 @@ let cell_width = 20;;
 let cell_height = 20;;
 let background = Graphics.white;;
 
-let draw_configuration (config : Types.configuration) =
-  let Configuration(_,Board(board)) = config in
+let draw_board (board : Types.board) =
+  let Board(board) = board in
   (* Loop over each cell in the board. Maybe there's a more OCaml-esq way to do
    * this. *)
   for i = 0 to (Array.length board) - 1 do
     let row = board.(i) in
     for j = 0 to (Array.length row) - 1 do
+      print_endline ("(i,j)="^"("^(string_of_int i)^","^(string_of_int j)^")");
       (* Move the cursor to the appropriate place. We're going to assume that
        * the board begins at (0,0). If this changes in the future, then we can
        * use Graphics.rmoveto instead. *)
@@ -31,13 +32,15 @@ let draw_configuration (config : Types.configuration) =
   done
 ;;
 
-let draw () =
+let draw_configuration (config : Types.configuration) =
+  let Configuration(_,board) = config in
+  draw_board board
+;;
+
+let draw_display (config : Types.configuration) =
   try 
     let display = Unix.getenv "DISPLAY" in
     Graphics.open_graph display;
-    let default_cell = Cell(None) in
-    let empty_board = Array.make_matrix 10 20 default_cell in
-    let config = Configuration([], Board(empty_board)) in
     draw_configuration config;
     let continue = ref true in
     while !continue do
@@ -50,5 +53,3 @@ let draw () =
     done;
   with Not_found -> prerr_endline "Error: No display"
 ;;
-
-draw ();;
