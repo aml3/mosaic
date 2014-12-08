@@ -46,14 +46,52 @@ let rotate_tile_cw (tile : Types.tile) =
   Tile(rotated_tile)
 ;;
 
-let brute_force (partial_solution : Types.configuration) = 
+(*
+ * Return a copy of the passed in board that has the tile added at spot (x,y).
+ *)
+let place_tile (tile : Types.tile)
+               (x : int) (* x-coordinate for the top-left corner. *)
+               (y : int) (* y-coordinate for the top-left corner. *)
+               (board : Types.board) =
+  let Tile(tile) = tile in
+  let Board(board) = board in
+  (* This may not be a deep copy. So, if things fail, check here. *)
+  let board = Array.copy board in (* Copy. Arrays are modified in place. *)
+  for i = 0 to (Array.length tile) - 1 do
+    let tile_row = tile.(i) in
+    let board_row = board.(i) in
+    for j = 0 to (Array.length tile_row) - 1 do
+      board_row.(j) <- tile_row.(j)
+    done
+  done;
+  Board(board)
+;;
+
+exception Found_solution of Types.configuration;;
+let rec brute_force (partial_solution : Types.configuration) = 
   let Configuration(remaining_tiles, Board(board)) = partial_solution in
   match remaining_tiles with
-  | [] -> partial_solution 
+  | [] -> (true, partial_solution)
   | hd :: tl ->
-      for n = 0 to 3 do
-        let rotated_tile = repeat rotate_tile_cw hd n in
-        ()
+    try for n = 0 to 3 do
+      let rotated_tile = repeat rotate_tile_cw hd n in
+      (* For now, just check every single spot. *)
+      for i = 0 to (Array.length board) - 1 do
+        let row = board.(i) in
+        for j = 0 to (Array.length row) - 1 do
+          if valid_placement rotated_tile j i (Board board)
+          then begin
+            let new_board = place_tile rotated_tile j i (Board board) in
+            let new_config = Configuration(tl, new_board) in
+            let (result, returned_solution) = brute_force new_config in
+            match result with
+            | true -> raise (Found_solution returned_solution)
+            | false -> ()
+          end
+        done;
       done;
-      partial_solution
+    done;
+    (* If we reach here, then we couldn't place a tile. *)
+    (false, partial_solution)
+    with Found_solution solution -> (true, solution)
 ;;
