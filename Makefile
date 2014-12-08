@@ -2,6 +2,7 @@ OCAMLC					= ocamlc
 OCAMLFIND				= ocamlfind
 OCAMLCFLAGS			= -package batteries
 OCAMLCINCLUDES	= graphics.cma unix.cma
+OCAMLCLINK			=	-linkpkg
 CMOFILES				= types.cmo display.cmo parse.cmo
 %.cmo : %.ml
 	$(OCAMLFIND) $(OCAMLC) $(OCAMLCFLAGS) $(OCAMLCINCLUDES) $<
