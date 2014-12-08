@@ -10,10 +10,10 @@ main: $(CMOFILES)
 	$(OCAMLC) $(CMOFILES)
 
 display: display.ml
-	ocamlc graphics.cma unix.cma types.ml display.ml
+	$(OCAMLC) $(OCAMLCINCLUDES) -o display types.ml display.ml
 
 solve: solve.ml
-	ocamlc types.ml solve.ml
+	$(OCAMLC) -o solve types.ml solve.ml
 
 clean:
-	rm a.out *.cmi *.cmo
+	rm display solve *.cmi *.cmo
