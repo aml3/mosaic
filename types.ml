@@ -1,11 +1,11 @@
 (* Type definitions *)
 
-(* We represent a cell by its color *)
+(* We represent a cell by its color. cells with None are empty. *)
 type cell = Cell of int option;;
 
 (*
  * We represent a tile by a grid of cells. If a cell isn't actually part of a tile,
- * we give it color #000000.
+ * we give it color #FFFFFF.
  *)
 type tile = Tile of cell array array;;
 
