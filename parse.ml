@@ -20,10 +20,10 @@ let get_column (grid : 'a array array) (col_idx : int) : 'a array =
   ;;
 
 (* Utility function to transpose the grid, without caring about it being ragged *)
-let transpose (grid : char array array) : char array array =
+let transpose (grid : 'a array array) (default_val : 'a): 'a array array =
   let col_lengths = Array.map (fun subarr -> Array.length subarr) grid in
   let longest_col = Array.max col_lengths in
-  let result = Array.make longest_col (Array.make 0 'a') in
+  let result = Array.make longest_col (Array.make 0 default_val) in
   Array.iter
     (fun row -> Array.iteri
           (fun c_idx col -> result.(c_idx) <- (Array.append (result.(c_idx)) (Array.singleton col)))
@@ -71,10 +71,10 @@ let rec make_tiles (shapes : char array array list) (colors : (char, Types.cell)
  *)
 let parse_grid (raw_grid : char array array) : ((tile list) * board) =
   (* Get the grid's transpose *)
-  let trans_grid = transpose raw_grid in
+  let trans_grid = transpose raw_grid '0' in
   (* Get the rows which contain no shape parts *)
   let blank_cols = Array.fold_lefti
-    (fun acc idx elem -> if Array.for_all (fun x -> x = '.') elem
+    (fun acc idx elem -> if Array.for_all (fun x -> x = ' ') elem
                             then acc @ [idx]
                             else acc)
     []
@@ -97,7 +97,7 @@ let parse_grid (raw_grid : char array array) : ((tile list) * board) =
     in
   (* Make tiles *)
   let color_table = Hashtbl.create 20 in
-  Hashtbl.add color_table '.' Empty;
+  Hashtbl.add color_table ' ' Empty;
   let tile_set = make_tiles tile_arrays color_table in
   let dimensions = List.map
     (fun (Tile elem) -> Array.fold_left (fun acc r_elem -> acc + (Array.length r_elem)) 0 elem)

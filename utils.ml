@@ -7,19 +7,19 @@ let string_of_cell cell =
   | Filled(i) -> "x"
 ;;
 
-let string_of_tile (tile : Types.tile) = 
+let string_of_tile (tile : Types.tile) =
   let Tile(tile) = tile in
   let chars = Array.map (fun row ->
     Array.map (fun cell -> string_of_cell cell) row) tile in
   Array.fold_left (fun acc row ->
-    let row_str = Array.fold_left (fun acc str_cell -> 
+    let row_str = Array.fold_left (fun acc str_cell ->
       acc ^ str_cell
     ) "" row in
     acc ^ row_str ^ "\n"
   ) "" chars
 ;;
 
-let print_coordinates i j = 
+let print_coordinates i j =
   print_endline ("(i,j)="^"("^(string_of_int i)^","^(string_of_int j)^")")
 ;;
 
@@ -37,12 +37,12 @@ let make_array dim_x dim_y =
 ;;
 
 (* Rotate a tile by 90 degrees clockwise. Gives back a fresh tile. *)
-let rotate_tile_cw (tile : Types.tile) = 
+let rotate_tile_cw (tile : Types.tile) =
   let Tile(tile) = tile in
   let orig_y = Array.length tile in
   (* This is here in case the array is ragged. *)
   let orig_x = Array.fold_left (fun acc r -> max (Array.length r) acc) 0 tile in
-  let rotated_tile = Utils.make_array orig_y orig_x in
+  let rotated_tile = make_array orig_y orig_x in
   Array.iteri (fun y row ->
     Array.iteri (fun x _ ->
       rotated_tile.(x).(orig_y - y - 1) <- tile.(y).(x);
@@ -66,7 +66,7 @@ let place_tile (tile : Types.tile)
     let new_board_row = new_board.(i+y) in
     Array.iteri (fun j _ ->
       match (new_board_row.(j+x)) with
-      | Filled _ 
+      | Filled _
       | Missing -> ()
       | Empty -> new_board_row.(j+x) <- tile_row.(j)
       ) tile_row
@@ -76,7 +76,7 @@ let place_tile (tile : Types.tile)
 
 (*
  * Loop over the tile and check to make sure each of its filled in cells
- * corresponds to an empty on in the board. We raise an exception as soon as a 
+ * corresponds to an empty on in the board. We raise an exception as soon as a
  * mismatch occurs.
  *)
 exception Invalid_placement;;
@@ -91,12 +91,12 @@ let valid_placement (tile : Types.tile)
       Array.iteri (fun j tile_cell ->
         let board_cell = (board.(i + y)).(j + x) in
         match (tile_cell, board_cell) with
-        | (Filled _, Filled _) 
+        | (Filled _, Filled _)
         | (Filled _, Missing) -> raise Invalid_placement
         | _ -> ()
-        ) tile_row 
+        ) tile_row
       ) tile;
     true end
-  with Invalid_placement 
+  with Invalid_placement
        | Invalid_argument(_) (* Fell off the board. *) -> false
 ;;
