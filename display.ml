@@ -94,11 +94,6 @@ let draw_display (solution : Types.solution) (board : Types.board) =
     draw_array board true;
     (* Then draw the tiles. *)
     let Solution(placements) = solution in
-    (*List.iter (fun (tile, coors) ->
-      let _ = Graphics.wait_next_event [Key_pressed] in
-      let (x,y) = remap coors dim_y in
-      Graphics.moveto (x*cell_width) (y*cell_height);
-      draw_tile tile false;) placements;*)
     let opt_hd lst = match lst with [] -> None | hd :: _ -> Some(hd) in
     let scroll left right = (* Appends the first item in left to right. *)
       match left with
@@ -114,15 +109,13 @@ let draw_display (solution : Types.solution) (board : Types.board) =
         | 'l' (* next solution *) -> ()
         | 'k' (* previous tile *) ->
           (* Remove tile, scroll back, and then draw the next tile. *)
-          let current = opt_hd left in begin
-          match current with 
+          let current = opt_hd left in 
+          begin match current with 
           | None -> ()
           | Some(tile, coors) ->
               let (x,y) = remap coors dim_y in
               Graphics.moveto (x*cell_width) (y*cell_height);
-              undraw_tile tile;
-
-          end;
+              undraw_tile tile; end;
           let (left, right) = scroll left right in
           loop left right true
         | 'j' (* next tile *) -> 
