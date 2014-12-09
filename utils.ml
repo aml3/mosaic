@@ -42,7 +42,7 @@ let rotate_tile_cw (tile : Types.tile) =
   let orig_y = Array.length tile in
   (* This is here in case the array is ragged. *)
   let orig_x = Array.fold_left (fun acc r -> max (Array.length r) acc) 0 tile in
-  let rotated_tile = Utils.make_array orig_y orig_x in
+  let rotated_tile = make_array orig_y orig_x in
   Array.iteri (fun y row ->
     Array.iteri (fun x _ ->
       rotated_tile.(x).(orig_y - y - 1) <- tile.(y).(x);
