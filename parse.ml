@@ -13,7 +13,7 @@ let make_grid (input_file : in_channel) : char array array =
 (* Utility function to extract a column of the grid *)
 let get_column (grid : 'a array array) (col_idx : int) : 'a array =
   let res_list = Array.fold_left
-    (fun acc elem -> acc @ [Array.get elem col_idx])
+    (fun acc elem -> acc @ [elem.(col_idx)])
     [] grid
     in
     Array.of_list res_list
@@ -26,10 +26,7 @@ let transpose (grid : char array array) : char array array =
   let result = Array.make longest_col (Array.make 0 'a') in
   Array.iter
     (fun row -> Array.iteri
-          (fun c_idx col -> Array.set
-                result
-                c_idx
-                (Array.append (Array.get result c_idx) (Array.singleton col)))
+          (fun c_idx col -> result.(c_idx) <- (Array.append (result.(c_idx)) (Array.singleton col)))
           row)
     grid;
   result
@@ -49,13 +46,12 @@ let make_tile (shape : char array array) (colors : (char, Types.cell) Hashtbl.t)
     ( fun idx elem ->
           ( let row = Array.make (Array.length elem) (Filled 0) in
             Array.iteri
-              ( fun r_idx r_elem -> Array.set
-                    row r_idx
+              ( fun r_idx r_elem -> row.(r_idx) <-
                     (( if not (Hashtbl.mem colors r_elem)
                        then update_colors colors r_elem);
                      (Hashtbl.find colors r_elem)))
               elem;
-            Array.set result idx row;))
+            result.(idx) <- row;))
   shape;
     (Tile result, colors)
   ;;
@@ -87,8 +83,8 @@ let parse_grid (raw_grid : char array array) : ((tile list) * board) =
   let blank_cols_arr = Array.of_list blank_cols in
   let bounds = Array.fold_lefti
     (fun acc idx elem -> if idx + 1 < (Array.length blank_cols_arr) &&
-                         (Array.get blank_cols_arr (idx + 1)) > (elem + 1)
-                      then (elem, (Array.get blank_cols_arr (idx + 1))) :: acc
+                         blank_cols_arr.(idx + 1) > (elem + 1)
+                      then (elem, blank_cols_arr.(idx + 1)) :: acc
                       else acc)
     []
     blank_cols_arr
