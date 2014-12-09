@@ -1,2 +1,2 @@
-......b...bab....abba
-.....aa.....a....baba....b
+      b   bab    abba
+     aa     a    baba    b
