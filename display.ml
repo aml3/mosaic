@@ -8,24 +8,43 @@ let cell_height = 20;;
 let empty_color = Graphics.white;;
 let missing_color = Graphics.black;;
 
+let undraw_array (arr : cell array array) =
+  Array.iteri (fun i row -> 
+    Array.iteri (fun j _ ->
+      begin match row.(j) with
+      | Filled _ -> begin
+        let curr_x = Graphics.current_x () in
+        let curr_y = Graphics.current_y () in
+        Graphics.set_color empty_color;
+        Graphics.fill_rect curr_x curr_y cell_width cell_height;
+        Graphics.set_color Graphics.black;
+        Graphics.draw_rect curr_x curr_y cell_width cell_height; end
+      | _ -> () (* Shouldn't clear empty or missing cells. *) end;
+      Graphics.rmoveto cell_width 0;
+    ) row;
+    Graphics.rmoveto 0 (-1*cell_height);
+    Graphics.moveto 0 (Graphics.current_y ());
+  ) arr
+;;
+
+let undraw_tile (tile : Types.tile) = 
+  let Tile(tile) = tile in 
+  undraw_array tile
+;;
+
 let draw_array (arr : cell array array)
                (flag : bool) (* Redraw previous contents. *) =
-  (* Loop over each cell in the arr. Maybe there's a more OCaml-esq way to do
-   * this. *)
   Array.iteri (fun i row ->
     Array.iteri (fun j _ ->
-      (* Move the cursor to the appropriate place. We're going to assume that
-       * the arr begins at (0,0). If this changes in the future, then we can
-       * use Graphics.rmoveto instead. *)
       let curr_x = Graphics.current_x () in
       let curr_y = Graphics.current_y () in
-      let color = row.(j) in
+      let cell = row.(j) in
       let draw_cell () =
         Graphics.fill_rect curr_x curr_y cell_width cell_height; (* Fill *)
         Graphics.set_color Graphics.black;
         Graphics.draw_rect curr_x curr_y cell_width cell_height; (* Border *)
       in
-      begin match color with
+      begin match cell with
         | Filled(color) -> begin
           Graphics.set_color color;
           draw_cell (); end
@@ -63,9 +82,9 @@ let draw_configuration (config : Types.configuration) (flag : bool) =
 let remap ((x,y) : (int * int)) (dim_y : int) =
   (x,dim_y - y)
 ;;
-
+    
 let draw_display (solution : Types.solution) (board : Types.board) =
-  try 
+  try
     let display = Unix.getenv "DISPLAY" in
     Graphics.open_graph display;
     (* First draw a blank board. *)
@@ -75,19 +94,49 @@ let draw_display (solution : Types.solution) (board : Types.board) =
     draw_array board true;
     (* Then draw the tiles. *)
     let Solution(placements) = solution in
-    List.iter (fun (tile, coors) ->
+    (*List.iter (fun (tile, coors) ->
       let _ = Graphics.wait_next_event [Key_pressed] in
       let (x,y) = remap coors dim_y in
       Graphics.moveto (x*cell_width) (y*cell_height);
-      draw_tile tile false;) placements;
-    let continue = ref true in
-    while !continue do
-      let status = Graphics.wait_next_event [Key_pressed] in
-      match status.key with
-      | 'q' -> continue := false
-      | 'j' -> ()
-      | 'k' -> ()
-      | _ -> ()
-    done;
+      draw_tile tile false;) placements;*)
+    let opt_hd lst = match lst with [] -> None | hd :: _ -> Some(hd) in
+    let scroll left right = (* Appends the first item in left to right. *)
+      match left with
+      | [] -> (left, right) (* No where to scroll. *)
+      | hd :: tl -> (tl, hd :: right) in
+    let rec loop left right continue = 
+      if not continue then ()
+      else
+        let status = Graphics.wait_next_event [Key_pressed] in
+        match status.key with
+        | 'q' -> loop [] [] false
+        | 'h' (* previous solution *) -> ()
+        | 'l' (* next solution *) -> ()
+        | 'k' (* previous tile *) ->
+          (* Remove tile, scroll back, and then draw the next tile. *)
+          let current = opt_hd left in begin
+          match current with 
+          | None -> ()
+          | Some(tile, coors) ->
+              let (x,y) = remap coors dim_y in
+              Graphics.moveto (x*cell_width) (y*cell_height);
+              undraw_tile tile;
+
+          end;
+          let (left, right) = scroll left right in
+          loop left right true
+        | 'j' (* next tile *) -> 
+          (* Scroll and then draw. *)
+          let current = opt_hd right in
+          begin match current with
+          | None -> ()
+          | Some(tile, coors) ->
+            let (x,y) = remap coors dim_y in
+            Graphics.moveto (x*cell_width) (y*cell_height);
+            draw_tile tile false; end;
+          let (right, left) = scroll right left in
+          loop left right true 
+        | _ -> loop left right true in
+    loop [] placements true
   with Not_found -> prerr_endline "Error: No display"
 ;;
