@@ -17,3 +17,5 @@ type board = Board of cell array array;;
  * tiles.
  *)
 type configuration = Configuration of (tile list) * board;;
+
+type solution = Solution of (tile * (int * int)) list;;

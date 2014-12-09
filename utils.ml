@@ -15,10 +15,10 @@ let string_of_tile (tile : Types.tile) =
     let row_str = Array.fold_left (fun acc str_cell -> 
       acc ^ str_cell
     ) "" row in
-    acc ^ "\n" ^ row_str
+    acc ^ row_str ^ "\n"
   ) "" chars
 ;;
 
-let print_coordinates i j indent = 
-  print_endline (indent^"(i,j)="^"("^(string_of_int i)^","^(string_of_int j)^")")
+let print_coordinates i j = 
+  print_endline ("(i,j)="^"("^(string_of_int i)^","^(string_of_int j)^")")
 ;;

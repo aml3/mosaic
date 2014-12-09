@@ -12,7 +12,7 @@ let valid_placement (tile : Types.tile)
                     (y : int) (* y-coordinate for the top-left corner. *)
                     (board : Types.board) =
   try begin
-    let Tile(grid) = tile in
+    let Tile(tile) = tile in
     let Board(board) = board in
     Array.iteri (fun i tile_row ->
       Array.iteri (fun j tile_cell ->
@@ -22,7 +22,7 @@ let valid_placement (tile : Types.tile)
         | (Filled _, Missing) -> raise Invalid_placement
         | _ -> ()
         ) tile_row 
-      ) grid;
+      ) tile;
     true end
   with Invalid_placement 
        | Invalid_argument(_) (* Fell off the board. *) -> false
@@ -41,7 +41,7 @@ let make_array dim_x dim_y =
   matrix
 ;;
 
-(* Rotate a tile by 90 degrees clockwise. *)
+(* Rotate a tile by 90 degrees clockwise. Gives back a fresh tile. *)
 let rotate_tile_cw (tile : Types.tile) = 
   let Tile(tile) = tile in
   let orig_y = Array.length tile in
@@ -68,34 +68,40 @@ let place_tile (tile : Types.tile)
   let deep_copy = Array.map (fun row -> Array.copy row) in
   let new_board = deep_copy board in (* Copy. Arrays are modified in place. *)
   Array.iteri (fun i tile_row ->
-    let new_board_row = new_board.(i) in
+    let new_board_row = new_board.(i+y) in
     Array.iteri (fun j _ ->
-      new_board_row.(j) <- tile_row.(j)
+      match (new_board_row.(j+x)) with
+      | Filled _ 
+      | Missing -> ()
+      | Empty -> new_board_row.(j+x) <- tile_row.(j)
       ) tile_row
     ) tile;
   Board(new_board)
 ;;
 
-exception Found_solution of Types.configuration;;
-let rec brute_force (partial_solution : Types.configuration) (indent : string) = 
-  let Configuration(remaining_tiles, Board(board)) = partial_solution in
-  match remaining_tiles with | [] -> (true, partial_solution)
+(* We return a list of tiles and their locations when we're done. *)
+exception Found_solution of Types.solution;;
+let rec brute_force (intermediate_state : Types.configuration) 
+                    (partial_solution : Types.solution) =
+  let Configuration(remaining_tiles, Board(board)) = intermediate_state in
+  match remaining_tiles with 
+  | [] -> (true, partial_solution)
   | hd :: tl ->
-    try for n = 0 to 3 do
-      print_endline (indent^"n="^(string_of_int n));
-      print_endline (indent^"original="^(string_of_tile hd));
+    try for n = 0 to 3 do (* Try each orientation for a tile. *)
       let rotated_tile = repeat rotate_tile_cw hd n in
-      print_endline (indent^"rotated="^(string_of_tile rotated_tile));
       (* For now, just check every single spot. *)
       Array.iteri (fun i row ->
         Array.iteri (fun j _ ->
           if valid_placement rotated_tile j i (Board board)
           then begin
-            let Board(new_board) = place_tile rotated_tile j i (Board board) in
-            let new_config = Configuration(tl, Board(new_board)) in
-            let (result, returned_solution) = brute_force new_config (indent^"\t") in
+            let new_board = place_tile rotated_tile j i (Board board) in
+            let Solution(placements) = partial_solution in
+            let placements = (rotated_tile, (j,i)) :: placements in
+            let partial_solution = Solution(placements) in
+            let new_state = Configuration(tl, new_board) in
+            let (result, solution) = brute_force new_state partial_solution in
             match result with
-            | true -> raise (Found_solution returned_solution)
+            | true -> raise (Found_solution solution)
             | false -> ()
           end
         ) row
@@ -107,5 +113,6 @@ let rec brute_force (partial_solution : Types.configuration) (indent : string) =
 ;;
 
 let solve (blank_config : Types.configuration) =
-  brute_force blank_config ""
+  let empty_solution = Solution [] in
+  brute_force blank_config empty_solution
 ;;
