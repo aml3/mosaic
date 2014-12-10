@@ -13,14 +13,13 @@ let rec brute_force (intermediate_state : Types.configuration)
   | hd :: tl ->
     try for n = 0 to 3 do (* Try each orientation for a tile. *)
       let rotated_tile = Utils.repeat Utils.rotate_tile_cw hd n in
-      for m = 0 to 1 do (* Try each reflection. *)
-        (* TODO: Add check for reflect *)
+      let reflect_count = if reflect then 1 else 0 in
+      for m = 0 to reflect_count do (* Try each reflection. *)
         let reflected_tile = Utils.repeat Utils.reflect_tile rotated_tile m in
         (* For now, just check every single spot. *)
         Array.iteri (fun i row ->
           Array.iteri (fun j _ ->
-            if Utils.valid_placement rotated_tile j i (Board board)
-              desired_board
+            if Utils.valid_placement reflected_tile j i (Board board) desired_board
             then begin
               let new_board = Utils.place_tile rotated_tile j i (Board board) in
               let Solution(placements) = partial_solution in

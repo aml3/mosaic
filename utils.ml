@@ -104,10 +104,12 @@ let valid_placement_arr (tile : cell array array)
   try begin
     Array.iteri (fun i tile_row ->
       Array.iteri (fun j tile_cell ->
-        let board_cell = (desired_board.(i + y)).(j + x) in
-        match (tile_cell, board_cell) with
-        | (Filled x, Filled y) when x <> y -> raise Color_mismatch
-        | (Filled _, Missing) -> raise Invalid_placement
+        let board_cell = (board.(i + y)).(j + x) in
+        let desired_cell = (desired_board.(i + y)).(j + x) in
+        match (tile_cell, board_cell, desired_cell) with
+        | (Filled x, _, Filled y) when x <> y -> raise Color_mismatch
+        | (Filled _, Filled _, _)
+        | (Filled _, Missing, _) -> raise Invalid_placement
         | _ -> ()
         ) tile_row
       ) tile;
