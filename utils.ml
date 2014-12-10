@@ -100,3 +100,44 @@ let valid_placement (tile : Types.tile)
   with Invalid_placement
        | Invalid_argument(_) (* Fell off the board. *) -> false
 ;;
+
+let make_dlx_grid (config : Types.configuration) =
+  (* 
+  * We need to first make t + (n*m) columns, where t is the number of tiles 
+  * and the board has dimensions nxm. We then need to initialize each column 
+  * with the appropriate entries.
+  *)
+  let Configuration(tiles, Board(grid)) = config in
+  let rec root = { matrix = matrix;
+                  left = root; 
+                  right = root; 
+                  up = root; 
+                  down = root; 
+                  col_h = root; 
+                  content = 0; 
+                  row = 0; 
+                  count = 0 } 
+  and matrix = { head = root; 
+                 mcount = 1; } in
+  let curr = root in
+  let num_tiles = List.length tiles in
+  let first_row =  grid.(0) in
+  let grid_size = (Array.length grid) * (Array.length first_row) in
+  for i = 1 to (num_tiles + grid_size) do
+    let temp = { matrix = matrix;
+                 left = root; 
+                 right = root; 
+                 up = root; 
+                 down = root; 
+                 col_h = root; 
+                 content = 0; 
+                 row = 0; 
+                 count = 0 } in
+    ()
+    (* TODO: Link temp up as the next in line, update pointers to maintain
+    circularity *)
+  done;
+  (* TODO: Another loop to go over the tiles and add the appropriate "filled"
+  nodes after the headers *)
+  matrix
+;;

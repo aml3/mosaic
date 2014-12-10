@@ -143,5 +143,8 @@ let rec brute_force (intermediate_state : Types.configuration)
 
 let solve (blank_config : Types.configuration) =
   let empty_solution = Solution [] in
-  brute_force blank_config empty_solution
+  let knuthgrid = Utils.make_dlx_grid blank_config in
+  let dlx_sol = dlx_x [] knuthgrid in
+  (* TODO: Utils.map_x_to_pieces dlx_sol blank_config *)
+  (false, empty_solution)
 ;;
