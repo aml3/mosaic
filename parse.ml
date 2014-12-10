@@ -1,4 +1,5 @@
 open Types
+open Utils
 open Batteries
 open Array
 open Hashtbl
@@ -56,7 +57,7 @@ let make_tile (shape : char array array) (colors : (char, Types.cell) Hashtbl.t)
     (Tile result, colors)
   ;;
 
-(* Utility function to make tiles from the list of arrays. Mostly just mapping chars to ints *)
+(* Constructor function to make tiles from the list of arrays. Mostly just mapping chars to ints *)
 let rec make_tiles (shapes : char array array list) (colors : (char, Types.cell) Hashtbl.t) : tile list =
   match shapes with
   | shape :: rest ->
@@ -65,40 +66,81 @@ let rec make_tiles (shapes : char array array list) (colors : (char, Types.cell)
   | []            -> []
   ;;
 
+(* Utility function to find the list of blank rows in the passed matrix *)
+let find_blank (grid : 'a array array) (blank_val : 'a) : int list =
+  Array.fold_lefti
+    (fun acc idx elem -> if Array.for_all (fun x -> x = blank_val) elem
+                            then acc @ [idx]
+                            else acc)
+    []
+    grid
+  ;;
+
+let make_bounds (boundary_values : int list) (extremum : int): (int * int) list =
+  if List.length boundary_values = 0
+  then []
+  else (
+  let boundary_values_arr = Array.of_list boundary_values in
+  let bounds = Array.fold_lefti
+    (fun acc idx elem -> if idx + 1 < (Array.length boundary_values_arr) &&
+                         boundary_values_arr.(idx + 1) > (elem + 1)
+                      then (elem, boundary_values_arr.(idx + 1)) :: acc
+                      else acc)
+    []
+    boundary_values_arr
+    in
+  bounds @ [(Array.get (Array.right boundary_values_arr 1) 0, extremum)]
+  )
+  ;;
+
+(* Utility function to subdivide grid into tile chunks *)
+let chunk_by_bounds (bounds : (int * int) list) (grid : char array array) : char array array list =
+  List.map
+    (fun (start, finish) -> Array.sub
+      grid
+      (if start > 0 then start + 1 else 0)
+      (if start > 0 || finish = Array.length grid then
+        (if finish - start > 0 then finish - start - 1 else 0)
+        else finish))
+    bounds
+  ;;
+
 (*
- * Utility function to parse an array of arrays representing the initial input
+ * Function to parse an array of arrays representing the initial input
  * into a list of valid tiles and the desired end board.
  *)
 let parse_grid (raw_grid : char array array) : ((tile list) * board) =
   (* Get the grid's transpose *)
   let trans_grid = transpose raw_grid '0' in
   (* Get the rows which contain no shape parts *)
-  let blank_cols = Array.fold_lefti
-    (fun acc idx elem -> if Array.for_all (fun x -> x = ' ') elem
-                            then acc @ [idx]
-                            else acc)
-    []
-    trans_grid
-    in
-  let blank_cols_arr = Array.of_list blank_cols in
-  let bounds = Array.fold_lefti
-    (fun acc idx elem -> if idx + 1 < (Array.length blank_cols_arr) &&
-                         blank_cols_arr.(idx + 1) > (elem + 1)
-                      then (elem, blank_cols_arr.(idx + 1)) :: acc
-                      else acc)
-    []
-    blank_cols_arr
-    in
-  let bounds = bounds @ [(Array.get (Array.right blank_cols_arr 1) 0, (Array.length trans_grid))] in
+  let blank_cols = find_blank trans_grid ' ' in
+  let col_bounds = make_bounds blank_cols (Array.length trans_grid) in
   (* Get the separate shapes *)
-  let tile_arrays = List.map
-    (fun (start, finish) -> Array.sub trans_grid (start + 1) (finish - start - 1))
-    bounds
-    in
-  (* Make tiles *)
+  let tile_arrays = chunk_by_bounds col_bounds trans_grid in
+  let tile_arrays = List.map (fun x -> transpose x '0') tile_arrays in
   let color_table = Hashtbl.create 20 in
   Hashtbl.add color_table ' ' Empty;
   let tile_set = make_tiles tile_arrays color_table in
+  List.iter (fun x -> Printf.printf "%s\n---------\n" (Utils.string_of_tile x)) tile_set;
+  let tile_chunks = List.map
+    (fun subarr ->
+      ( let blank_rows = find_blank subarr ' ' in
+        let row_bounds = make_bounds blank_rows (Array.length subarr) in
+        let row_bounds = (0, (if blank_rows <> [] then List.min blank_rows else Array.length subarr)) :: row_bounds in
+        List.iter (fun (x,y) -> Printf.printf "(%d,%d) " x y) row_bounds;
+        Printf.printf "\n";
+        if List.length row_bounds > 1
+        then chunk_by_bounds row_bounds subarr
+        else [subarr]
+      )
+    )
+    tile_arrays
+  in
+  let tile_chunks = List.concat tile_chunks in
+  (* Make tiles *)
+  let color_table = Hashtbl.create 20 in
+  Hashtbl.add color_table ' ' Empty;
+  let tile_set = make_tiles tile_chunks color_table in
   let dimensions = List.map
     (fun (Tile elem) -> Array.fold_left (fun acc r_elem -> acc + (Array.length r_elem)) 0 elem)
     tile_set
@@ -107,6 +149,7 @@ let parse_grid (raw_grid : char array array) : ((tile list) * board) =
   let (largest_size_idx, _) = List.findi (fun _ x -> x = largest_size) dimensions in
   let (_, Tile largest_tile) = List.findi (fun idx x -> idx = largest_size_idx) tile_set in
   let tile_set = List.remove_at largest_size_idx tile_set in
+  let tile_set = List.filter (fun (Tile x) -> Array.length x > 0) tile_set in
   (tile_set, Board largest_tile)
   ;;
 
