@@ -51,6 +51,21 @@ let rotate_tile_cw (tile : Types.tile) =
   Tile(rotated_tile)
 ;;
 
+let reflect_tile (tile : Types.tile) = 
+  let Tile(tile) = tile in
+  let orig_y = Array.length tile in
+  (* This is here in case the array is ragged. *)
+  let orig_x = Array.fold_left (fun acc r -> max (Array.length r) acc) 0 tile in
+  let reflected_tile = make_array orig_x orig_y in
+  Array.iteri (fun y row ->
+    Array.iteri (fun x e ->
+      (* Reflect across the x-axis. *)
+      reflected_tile.(y).(orig_x - x - 1) <- e;
+    ) row;
+  ) tile;
+  Tile(reflected_tile)
+;;
+
 (*
  * Return a copy of the passed in board that has the tile added at spot (x,y).
  *)
@@ -80,13 +95,11 @@ let place_tile (tile : Types.tile)
  * mismatch occurs.
  *)
 exception Invalid_placement;;
-let valid_placement (tile : Types.tile)
-                    (x : int) (* x-coordinate for the top-left corner. *)
-                    (y : int) (* y-coordinate for the top-left corner. *)
-                    (board : Types.board) =
+let valid_placement_arr (tile : cell array array)
+                        (x : int)
+                        (y : int)
+                        (board : cell array array) =
   try begin
-    let Tile(tile) = tile in
-    let Board(board) = board in
     Array.iteri (fun i tile_row ->
       Array.iteri (fun j tile_cell ->
         let board_cell = (board.(i + y)).(j + x) in
@@ -101,13 +114,67 @@ let valid_placement (tile : Types.tile)
        | Invalid_argument(_) (* Fell off the board. *) -> false
 ;;
 
+let valid_placement (tile : Types.tile)
+                    (x : int) (* x-coordinate for the top-left corner. *)
+                    (y : int) (* y-coordinate for the top-left corner. *)
+                    (board : Types.board) =
+  let Tile(tile) = tile in
+  let Board(board) = board in
+  valid_placement_arr tile x y board
+;;
+
+let eqclass_of_tile (tile : Types.tile) =
+  let eqclass = ref [] in
+  for i = 0 to 3 do (* number of rotations *)
+    let rotated_tile = repeat rotate_tile_cw tile i in
+    for j = 0 to 1 do (* number of reflections *)
+      let reflected_tile = repeat reflect_tile tile j in
+      eqclass := reflected_tile :: !eqclass;
+    done;
+  done;
+  !eqclass
+;;
+
+let row_of_eqclass (dlx_row : cell array) 
+                   (int : nclasses)
+                   (board : cell array array)
+                   (eqclass : Types.tile list) = 
+  (* For each spot on the board, filter the eqclass by tiles that can fit at
+   * that spot. Note that we have to do this for every tile, since rotations may
+   * not by symmetric. *)
+  Array.iteri (fun i board_row ->
+    Array.iteri (fun j board_e ->
+      List.iteri (fun Tile(tile) ->
+        let is_valid = valid_placement_arr tile j i board in
+                
+      ) eqclass;
+    ) board_row;
+  ) board;
+;;
+
 let make_dlx_grid (config : Types.configuration) =
   (* 
   * We need to first make t + (n*m) columns, where t is the number of tiles 
   * and the board has dimensions nxm. We then need to initialize each column 
   * with the appropriate entries.
   *)
-  let Configuration(tiles, Board(grid)) = config in
+  let Configuration(tiles, board) = config in
+  (* Make an equivalence class for each tile. *)
+  let eqclasses = List.map (eqclass_of_tile) tiles in
+  (* These equivalence classes will become the rows in our dlx table. For each
+   * equivalence class, we need to try placing it in every position on the grid.
+   * Each new placement gives another row.
+   *
+   * Start by making a large matrix for the dlx algorthim. We'll convert it to a
+   * sparse matrix later. *)
+  let num_tiles = List.length tiles in
+  let Board(grid) = board in
+  let first_row =  grid.(0) in
+  let grid_size = (Array.length grid) * (Array.length first_row) in
+  let dlx_x = (num_tiles + grid_size) in
+  let dlx_row = Array.make dlx_x 0 in
+  let rows = List.map 
+    (row_of_eqclass (Array.copy dlx_row) nclasses board) eqclasses in
   let rec root = { matrix = matrix;
                   left = root; 
                   right = root; 
@@ -120,9 +187,6 @@ let make_dlx_grid (config : Types.configuration) =
   and matrix = { head = root; 
                  mcount = 1; } in
   let curr = root in
-  let num_tiles = List.length tiles in
-  let first_row =  grid.(0) in
-  let grid_size = (Array.length grid) * (Array.length first_row) in
   for i = 1 to (num_tiles + grid_size) do
     let temp = { matrix = matrix;
                  left = root; 
