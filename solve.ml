@@ -109,7 +109,7 @@ let cover_reassign (node : Types.dlx_node) =
 let uncover_reassign (node : Types.dlx_node) =
     node_iter
         (fun x -> node_iter
-            (fun y -> (y.down.up < y; y.up.down <- y; y.col_h.count <- y.col_h.count + 1))
+            (fun y -> (y.down.up <- y; y.up.down <- y; y.col_h.count <- y.col_h.count + 1))
             (fun y -> y.left)
             x)
         (fun x -> x.up)
@@ -188,5 +188,8 @@ let rec brute_force (intermediate_state : Types.configuration)
 
 let solve (blank_config : Types.configuration) =
   let empty_solution = Solution [] in
-  brute_force blank_config empty_solution
+  (* brute_force blank_config empty_solution *)
+  let knuthgrid = Utils.make_dlx_grid blank_config in
+  let dlx_sol = dlx_x [] knuthgrid in
+  Utils.map_x_to_pieces dlx_sol blank_config
 ;;
