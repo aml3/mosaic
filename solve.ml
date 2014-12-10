@@ -11,23 +11,26 @@ let rec brute_force (intermediate_state : Types.configuration)
   | hd :: tl ->
     try for n = 0 to 3 do (* Try each orientation for a tile. *)
       let rotated_tile = Utils.repeat Utils.rotate_tile_cw hd n in
-      (* For now, just check every single spot. *)
-      Array.iteri (fun i row ->
-        Array.iteri (fun j _ ->
-          if Utils.valid_placement rotated_tile j i (Board board)
-          then begin
-            let new_board = Utils.place_tile rotated_tile j i (Board board) in
-            let Solution(placements) = partial_solution in
-            let placements = (rotated_tile, (j,i)) :: placements in
-            let partial_solution = Solution(placements) in
-            let new_state = Configuration(tl, new_board) in
-            let (result, solution) = brute_force new_state partial_solution in
-            match result with
-            | true -> raise (Found_solution solution)
-            | false -> ()
-          end
-        ) row
-      ) board
+      for m = 0 to 1 do (* Try each reflection. *)
+        let reflected_tile = Utils.repeat Utils.reflect_tile rotated_tile m in
+        (* For now, just check every single spot. *)
+        Array.iteri (fun i row ->
+          Array.iteri (fun j _ ->
+            if Utils.valid_placement rotated_tile j i (Board board)
+            then begin
+              let new_board = Utils.place_tile rotated_tile j i (Board board) in
+              let Solution(placements) = partial_solution in
+              let placements = (rotated_tile, (j,i)) :: placements in
+              let partial_solution = Solution(placements) in
+              let new_state = Configuration(tl, new_board) in
+              let (result, solution) = brute_force new_state partial_solution in
+              match result with
+              | true -> raise (Found_solution solution)
+              | false -> ()
+            end
+          ) row
+        ) board
+      done;
     done;
     (* If we reach here, then we couldn't place a tile. *)
     (false, partial_solution)

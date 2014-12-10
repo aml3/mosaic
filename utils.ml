@@ -95,6 +95,7 @@ let place_tile (tile : Types.tile)
  * mismatch occurs.
  *)
 exception Invalid_placement;;
+exception Color_mismatch;;
 let valid_placement_arr (tile : cell array array)
                         (x : int)
                         (y : int)
@@ -104,13 +105,14 @@ let valid_placement_arr (tile : cell array array)
       Array.iteri (fun j tile_cell ->
         let board_cell = (board.(i + y)).(j + x) in
         match (tile_cell, board_cell) with
-        | (Filled _, Filled _)
+        | (Filled x, Filled y) when x <> y -> raise Color_mismatch
         | (Filled _, Missing) -> raise Invalid_placement
         | _ -> ()
         ) tile_row
       ) tile;
     true end
   with Invalid_placement
+       | Color_mismatch
        | Invalid_argument(_) (* Fell off the board. *) -> false
 ;;
 
