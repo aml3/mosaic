@@ -135,13 +135,14 @@ let eqclass_of_tile (tile : Types.tile) =
   !eqclass
 ;;
 
-let row_of_eqclass (dlx_row : cell array) 
-                   (int : nclasses)
+let row_of_eqclass (dim_x : int)
+                   (nclasses : int)
                    (board : cell array array)
                    (eqclass : Types.tile list) = 
   (* For each spot on the board, filter the eqclass by tiles that can fit at
    * that spot. Note that we have to do this for every tile, since rotations may
    * not by symmetric. *)
+  let empty_row = Array.make dim_x 0 in
   Array.iteri (fun i board_row ->
     Array.iteri (fun j board_e ->
       List.iteri (fun Tile(tile) ->
@@ -171,10 +172,9 @@ let make_dlx_grid (config : Types.configuration) =
   let Board(grid) = board in
   let first_row =  grid.(0) in
   let grid_size = (Array.length grid) * (Array.length first_row) in
-  let dlx_x = (num_tiles + grid_size) in
-  let dlx_row = Array.make dlx_x 0 in
+  let dim_x = (num_tiles + grid_size) in
   let rows = List.map 
-    (row_of_eqclass (Array.copy dlx_row) nclasses board) eqclasses in
+    (row_of_eqclass dim_x nclasses board) eqclasses in
   let rec root = { matrix = matrix;
                   left = root; 
                   right = root; 
