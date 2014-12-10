@@ -135,22 +135,36 @@ let eqclass_of_tile (tile : Types.tile) =
   !eqclass
 ;;
 
+let empty_node () = 
+  let rec node = {
+   right = node; 
+   up = node; 
+   down = node; 
+   col_h = node; 
+   row = 0; 
+   count = 0 } in node
+;;
+
 let indices_of_tile (tile : Types.tile) =
   let indices = ref [] in
   Array.iteri (fun i row ->
-    Array.iteri (fun j _ -> indices := (j,i) :: !indices;) row) tiles in
+    Array.iteri (fun j e -> 
+      match e with 
+      | Filled _ -> indices := (j,i) :: !indices;
+      | _ -> ();) row) tiles in
   !indices
 ;;
 
 let rows_of_eqclass (dim_x : int)
-                   (nclasses : int)
-                   (board : cell array array)
-                   (eqclass : Types.tile list) = 
+                    (nclasses : int)
+                    (eq_count : int)
+                    (board : cell array array)
+                    (eqclass : Types.tile list) = 
   (* For each spot on the board, filter the eqclass by tiles that can fit at
    * that spot. Note that we have to do this for every tile, since rotations may
    * not by symmetric. *)
   let rows = ref [] in
-  let empty_row = Array.make dim_x 0 in
+  let empty_row = Array.make dim_x None in
   Array.iteri (fun i board_row ->
     Array.iteri (fun j board_e ->
       let valid_tiles = List.filter (fun Tile(tile) ->
@@ -163,7 +177,9 @@ let rows_of_eqclass (dim_x : int)
         let flat_indices = List.map (fun (x,y) -> x + y*dim_x) indices in
         (* Set each spot in the row corresponding to an index to 1 in the
          * equivalence class's row. *)
-        List.iteri(fun index -> eqclass_row.(nclasses+index) <- 1) flat_indices;
+        List.iteri(fun index -> 
+          eqclass_row.(nclasses+index) <- Some (empty_node ())) flat_indices;
+        eqclass_row.(eq_count) <- Some(empty_node ());
         rows := eqclass_row :: !rows;
       ) tiles;
     ) board_row;
@@ -172,11 +188,6 @@ let rows_of_eqclass (dim_x : int)
 ;;
 
 let make_dlx_grid (config : Types.configuration) =
-  (* 
-  * We need to first make t + (n*m) columns, where t is the number of tiles 
-  * and the board has dimensions nxm. We then need to initialize each column 
-  * with the appropriate entries.
-  *)
   let Configuration(tiles, board) = config in
   (* Make an equivalence class for each tile. *)
   let eqclasses = List.map (eqclass_of_tile) tiles in
@@ -191,20 +202,51 @@ let make_dlx_grid (config : Types.configuration) =
   let first_row = grid.(0) in
   let grid_size = (Array.length grid) * (Array.length first_row) in
   let dim_x = (num_tiles + grid_size) in
-  let rows_list = List.map 
-    (rows_of_eqclass dim_x nclasses board) eqclasses in
-  (* TODO: Set correct column in row to prevent eqclass overlap. *)
-  let rec root = { matrix = matrix;
-                  left = root; 
-                  right = root; 
-                  up = root; 
-                  down = root; 
-                  col_h = root; 
-                  content = 0; 
-                  row = 0; 
-                  count = 0 } 
-  and matrix = { head = root; 
-                 mcount = 1; } in
+  let eq_count = ref -1 in
+  let rows_list = List.map (fun eqclass ->
+    let eq_count = !eq_count + 1 in
+    rows_of_eqclass dim_x nclasses eq_count board eqclass) eqclasses in
+  let matrix = Array.of_list rows_list in
+  (* Set the row for each node. *)
+  Array.iteri (fun i row ->
+    Array.iteri (fun _ e ->
+      match e with
+      | None -> ()
+      | Some(node) -> node.row = i;
+    ) row
+  ) matrix;
+  (* Now, we have a large array and want to compress it to a sparse one. *)
+  Array.iteri (fun i row -> (* Link across each row. *)
+    let nonempty_entries = Array.filter ((<>) None) row in
+    let num_nonempties = ref (Array.len nonempty_entries) in
+    (* Start with the previous node being the last node in the row. *)
+    let prev = ref (nonempty_entries.(!num_nonempties - 1)) in
+    Array.iteri (fun _ r_e ->
+      r_e.left = !prev;
+      !prev.right = r_e;
+      prev := r_e;
+    ) nonempty_entries;
+  ) matrix;
+  (* Link columns. *)
+  for j = 0 to (dim_x-1) do
+    let col = Array.fold_right (fun (_, row) acc -> row.(j) :: acc) matrix [] in
+    let nonempty_entries = List.filter ((<>) None) col in
+    (* TODO: insert check for empty column. *)
+    let prev = ref (nonempty_entries.((Array.length nonempty_entries) - 1)) in
+    List.iter (fun _ c_e ->
+      c_e.up = !prev;
+      !prev.down = c_e;
+      prev := c_e;
+    ) nonempty_entries;
+  done;
+  (* Now filter out all the fluff. *)
+  let sparse_matrix = Array.map (Array.filter ((<>) None)) matrix;
+  let num_nodes = Array.fold_left (fun acc row -> 
+    acc + Array.len row) 0 sparse_matrix;
+  let root = sparse_matrix.(0).(0) in
+  let matrix = { head = root; 
+                 mcount = num_nodes; } in
+
   let curr = root in
   for i = 1 to (num_tiles + grid_size) do
     let temp = { matrix = matrix;

@@ -19,9 +19,7 @@ let find_least_filled_col (grid : Types.dlx_matrix) =
 let find_covered_rows (col_hdr : Types.dlx_node) =
   let rec find_covered (curr : Types.dlx_node) (acc : Types.dlx_node list) = 
     if curr == col_hdr then acc
-    else match curr.content with 
-      | 0 -> find_covered curr.down acc
-      | _ -> find_covered curr.down (curr :: acc) in
+    else find_covered curr.down (curr :: acc) in
   find_covered col_hdr.down []
 ;;
 
@@ -34,12 +32,12 @@ let node_iter (shaker : Types.dlx_node -> 'a) (* Function to apply to nodes. *)
   node_iter_rec (mover start)
 ;;
 
-let update_count (node : Types.dlx_node) (delta : int) =
+let update_count (node : Types.dlx_node) (mat : Types.dlx_matrix) (inc : int) =
   node.col_h.count <- node.col_h.count + delta;
-  node.matrix.mcount <- node.matrix.mcount + delta;
+  mat.mcount <- mat.mcount + inc;
 ;;
 
-let cover_reassign (node : Types.dlx_node) =
+let cover_reassign (node : Types.dlx_node) (mat : Types.dlx_matrix) =
   (* Remove the node from it's row. *)
   node.right.left <- node.left;
   node.left.right <- node.right;
@@ -51,14 +49,14 @@ let cover_reassign (node : Types.dlx_node) =
         (fun y ->
           y.down.up <- y.up;
           y.up.down <- y.down; 
-          update_count y (-1);)
+          update_count y mat (-1);)
         (fun y -> y.right)
         x)
     (fun x -> x.down) (* mover *)
     node
 ;;
 
-let uncover_reassign (node : Types.dlx_node) =
+let uncover_reassign (node : Types.dlx_node) (mat : Types.dlx_matrix)=
   (* Go across each row in the column, adding it back. *)
   node_iter
     (fun x -> (* shaker *)
@@ -66,7 +64,7 @@ let uncover_reassign (node : Types.dlx_node) =
         (fun y -> (* shaker *)
           y.down.up <- y; 
           y.up.down <- y; 
-          update_count y 1;)
+          update_count y mat 1;)
         (fun y -> y.left) (* mover *)
         x)
     (fun x -> x.up) (* mover *)
@@ -88,7 +86,7 @@ let rec dlx_x (sol : int list) (grid : Types.dlx_matrix) =
     if count = 0 then [sol] (* Unsuccessful. *)
     else begin
       let rows = find_covered_rows col in
-      cover_reassign col;
+      cover_reassign col grid;
       let sols = List.map (fun row -> 
         node_iter
           (fun x -> cover_reassign x.col_h)
@@ -101,7 +99,7 @@ let rec dlx_x (sol : int list) (grid : Types.dlx_matrix) =
             row;
          new_sol
       ) rows in
-      uncover_reassign col;
+      uncover_reassign col grid;
       one_level_flatten sols end
   end
 ;;
