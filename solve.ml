@@ -45,13 +45,25 @@ let rec algorithm_x (rows : (int * (int list)) list)
      * deal with randomness right now, so we'll just take the first one. If it
      * works with a random selection then it should work with a deterministic
      * one.) *)
-    let (i,row) = List.find (fun (i,row) ->
+    let (r_i,r) = List.find (fun (i,row) ->
       if (List.nth row c_j) <> 0 then true else false
     ) rows in
-    (* TODO: Remove all rows that also have a 1 in one of r's columns. *)
-    (* TODO: Remove all columns covered by r. *)
-    (* TODO: Add t to the solution and recurse. *)
-    (false, selection)
+    (* Remove all rows conflicting with r. *)
+    let rows = List.filter (fun (_, row) ->
+      if (List.exists2 (fun row_e r_e -> row_e = r_e && row_e <> 0) row r)
+      then false
+      else true
+    ) rows in
+    (* Remove all columns covered by r. *)
+    let cols = List.filter (fun (j,col) -> 
+      let r_e = (List.nth r j) in
+      if (List.exists ((=) r_e) col) then false else true
+    ) cols in
+    (* Remove r. *)
+    let rows = List.filter (fun (i,_) -> i <> r_i) rows in
+    (* Add r to the solution and recurse. *)
+    let selection = r_i :: selection in
+    algorithm_x rows cols selection
 ;;
 
 (* We return a list of tiles and their locations when we're done. *)
