@@ -99,11 +99,12 @@ exception Color_mismatch;;
 let valid_placement_arr (tile : cell array array)
                         (x : int)
                         (y : int)
-                        (board : cell array array) =
+                        (board : cell array array)
+                        (desired_board : cell array array) =
   try begin
     Array.iteri (fun i tile_row ->
       Array.iteri (fun j tile_cell ->
-        let board_cell = (board.(i + y)).(j + x) in
+        let board_cell = (desired_board.(i + y)).(j + x) in
         match (tile_cell, board_cell) with
         | (Filled x, Filled y) when x <> y -> raise Color_mismatch
         | (Filled _, Missing) -> raise Invalid_placement
@@ -119,8 +120,10 @@ let valid_placement_arr (tile : cell array array)
 let valid_placement (tile : Types.tile)
                     (x : int) (* x-coordinate for the top-left corner. *)
                     (y : int) (* y-coordinate for the top-left corner. *)
-                    (board : Types.board) =
+                    (board : Types.board) 
+                    (desired_board : Types.board) =
   let Tile(tile) = tile in
   let Board(board) = board in
-  valid_placement_arr tile x y board
+  let Board(desired_board) = desired_board in
+  valid_placement_arr tile x y board desired_board
 ;;

@@ -4,7 +4,9 @@ open Utils;;
 (* We return a list of tiles and their locations when we're done. *)
 exception Found_solution of Types.solution;;
 let rec brute_force (intermediate_state : Types.configuration) 
-                    (partial_solution : Types.solution) =
+                    (partial_solution : Types.solution) 
+                    (desired_board : Types.board)
+                    (reflect : bool) =
   let Configuration(remaining_tiles, Board(board)) = intermediate_state in
   match remaining_tiles with 
   | [] -> (true, partial_solution)
@@ -12,18 +14,25 @@ let rec brute_force (intermediate_state : Types.configuration)
     try for n = 0 to 3 do (* Try each orientation for a tile. *)
       let rotated_tile = Utils.repeat Utils.rotate_tile_cw hd n in
       for m = 0 to 1 do (* Try each reflection. *)
+        (* TODO: Add check for reflect *)
         let reflected_tile = Utils.repeat Utils.reflect_tile rotated_tile m in
         (* For now, just check every single spot. *)
         Array.iteri (fun i row ->
           Array.iteri (fun j _ ->
             if Utils.valid_placement rotated_tile j i (Board board)
+              desired_board
             then begin
               let new_board = Utils.place_tile rotated_tile j i (Board board) in
               let Solution(placements) = partial_solution in
               let placements = (rotated_tile, (j,i)) :: placements in
               let partial_solution = Solution(placements) in
               let new_state = Configuration(tl, new_board) in
-              let (result, solution) = brute_force new_state partial_solution in
+              let (result, solution) = brute_force 
+                new_state 
+                partial_solution
+                desired_board
+                reflect
+                in 
               match result with
               | true -> raise (Found_solution solution)
               | false -> ()
@@ -37,7 +46,9 @@ let rec brute_force (intermediate_state : Types.configuration)
     with Found_solution solution -> (true, solution)
 ;;
 
-let solve (blank_config : Types.configuration) (reflect : bool) =
+let solve (blank_config : Types.configuration) 
+          (reflect : bool) 
+          (desired_board : Types.board) =
   let empty_solution = Solution [] in
-  brute_force blank_config empty_solution
+  brute_force blank_config empty_solution desired_board reflect
 ;;
