@@ -23,20 +23,20 @@ type solution = Solution of (tile * (int * int)) list;;
 
 (* The node type for the Dancing Links algorithm *)
 type dlx_node = {
+    matrix : dlx_matrix; (* Reference to the matrix holding this node. *)
     mutable left : dlx_node;
     mutable right : dlx_node;
     mutable up :dlx_node;
     mutable down : dlx_node;
     mutable col_h : dlx_node;
 
-    content : cell;
+    content : int;
     row : int;
-    col : int;
     mutable count : int;
-};;
+}
 
 (* The sparse matrix type for the Dancing Links algorithm *)
-type dlx_matrix = {
+and dlx_matrix = {
     head : dlx_node;
-    count : int
+    mutable mcount : int
 };;

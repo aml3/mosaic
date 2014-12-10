@@ -1,156 +1,111 @@
 open Types;;
 open Utils;;
 
-let num_nonzeros (column : int list) = List.fold_left (fun acc value -> 
-  if value <> 0 then acc+1 else acc) 0 column
-;;
-
-let all_zeros (rows : (int * (int list)) list) = 
-  List.fold_left (fun acc (_,row) ->
-    (List.fold_left (fun ac entry ->
-        if entry = 0 then ac else false) true row) && acc
-  ) true rows
-;;
-
 (*
  * Run Knuth's algorithm X. Return a list containing the indices of rows in the
  * exact cover.
- *
- * Since we'll want to eventually use a sparse array for dancing links, we'll
- * pass in lists for the rows and for the columns. Otherwise, taking the
- * transpose of a sparse array will not be fun. The first part of a tuple in a
- * list is the index, the second part is the actual row/column. We may have to
- * modify this for dancing links (e.g. every entry in a row also needs a column
- * int).
- *
- * NOTE: We'll have to keep rows and cols in sync. Is there a better way to 
- * handle dancing links? I think arrays will cause lots of pain later on.
  *)
-(* Commented b/c dancing links exists
-let rec algorithm_x (rows : (int * (int list)) list)
-                    (cols : (int * (int list)) list)
-                    (selection : int list) (* Indices of rows in the cover *) =
-  (* We're done if the grid is empty. If it's all zeros, then there isn't a
-   * solution for this branch. *)
-  match rows with 
-  | [] -> (true, selection)
-  | rows when all_zeros rows -> (false, selection)
-  | _ ->
-    (* Find the column c with the fewest non-zero entries. *)
-    let (c_j, c) = List.fold_left (fun (col_j, min_col) (j, col) ->
-      if num_nonzeros col < num_nonzeros min_col 
-      then (j, col) else (col_j, min_col)) (List.hd cols) (List.tl cols) in
-    (* Randomly select a row r with a nonzero entry t from c. (I don't want to
-     * deal with randomness right now, so we'll just take the first one. If it
-     * works with a random selection then it should work with a deterministic
-     * one.) *)
-    let (r_i,r) = List.find (fun (i,row) ->
-      if (List.nth row c_j) <> 0 then true else false
-    ) rows in
-    (* TODO: Keep rows and cols in sync. *)
-    (* Remove all rows conflicting with r. *)
-    let rows = List.filter (fun (_, row) ->
-      if (List.exists2 (fun row_e r_e -> row_e = r_e && row_e <> 0) row r)
-      then false else true) rows in
-    (* Remove all columns covered by r. *)
-    let cols = List.filter (fun (j,col) -> 
-      let r_e = (List.nth r j) in
-      if (List.exists ((=) r_e) col) then false else true) cols in
-    (* Remove r. *)
-    let rows = List.filter (fun (i,_) -> i <> r_i) rows in
-    (* Add r to the solution and recurse. *)
-    let selection = r_i :: selection in
-    algorithm_x rows cols selection
-;;
-*)
 
 (* DANCING LINKS START *)
 
 let find_least_filled_col (grid : Types.dlx_matrix) =
-    let rec rec_find_least_filled (min : int) (curr_best : Types.dlx_node) (curr : Types.dlx_node) =
-        if curr == grid.head then curr_best
-        else 
-            if curr.count < min then rec_find_least_filled curr.count curr curr.right
-            else rec_find_least_filled min curr_best curr.right
-        in
-    rec_find_least_filled grid.head.count grid.head grid.head.right
-    ;;
+  let rec least (min : int) (best : Types.dlx_node) (curr : Types.dlx_node) =
+    if curr == grid.head then (best, min)
+    else if curr.count < min then least curr.count curr curr.right
+      else least min best curr.right in
+  least grid.head.count grid.head grid.head.right
+;;
 
 let find_covered_rows (col_hdr : Types.dlx_node) =
-    let rec rec_find_covered_rows (curr : Types.dlx_node) = 
-        if curr == col_hdr then []
-        else match curr.content with 
-                | Filled _ -> curr :: (rec_find_covered_rows curr.down)
-                | _        -> rec_find_covered_rows curr.down
-        in
-    rec_find_covered_rows col_hdr.down
-    ;;
+  let rec find_covered (curr : Types.dlx_node) (acc : Types.dlx_node list) = 
+    if curr == col_hdr then acc
+    else match curr.content with 
+      | 0 -> find_covered curr.down acc
+      | _ -> find_covered curr.down (curr :: acc) in
+  find_covered col_hdr.down []
+;;
 
-let node_iter (shaker : Types.dlx_node -> 'a) (mover : Types.dlx_node -> Types.dlx_node) (start : Types.dlx_node) =
-    let rec node_iter_rec (curr : Types.dlx_node) =
-        if curr != start
-        then (shaker curr; node_iter_rec (mover curr))
-    in
-    node_iter_rec (mover start)
-    ;;
+let node_iter (shaker : Types.dlx_node -> 'a) (* Function to apply to nodes. *)
+              (mover : Types.dlx_node -> Types.dlx_node) (* Node movement. *)
+              (start : Types.dlx_node) =
+  let rec node_iter_rec (curr : Types.dlx_node) =
+      if curr != start
+      then (shaker curr; node_iter_rec (mover curr)) in
+  node_iter_rec (mover start)
+;;
+
+let update_count (node : Types.dlx_node) (delta : int) =
+  node.col_h.count <- node.col_h.count + delta;
+  node.matrix.mcount <- node.matrix.mcount + delta;
+;;
 
 let cover_reassign (node : Types.dlx_node) =
-    node.right.left <- node.left;
-    node.left.right <- node.right;
-    node_iter
-        (fun x -> node_iter 
-            (fun y -> (y.down.up <- y.up; y.up.down <- y.down; y.col_h.count <- y.col_h.count - 1))
-            (fun y -> y.right)
-            x)
-        (fun x -> x.down)
-        node
-    ;;
+  (* Remove the node from it's row. *)
+  node.right.left <- node.left;
+  node.left.right <- node.right;
+  (* For each row in its column, remove that row. *)
+  node_iter
+    (fun x -> (* shaker *)
+      (* Remove other rows with the same content in that column. *)
+      node_iter
+        (fun y ->
+          y.down.up <- y.up;
+          y.up.down <- y.down; 
+          update_count y (-1);)
+        (fun y -> y.right)
+        x)
+    (fun x -> x.down) (* mover *)
+    node
+;;
 
 let uncover_reassign (node : Types.dlx_node) =
-    node_iter
-        (fun x -> node_iter
-            (fun y -> (y.down.up < y; y.up.down <- y; y.col_h.count <- y.col_h.count + 1))
-            (fun y -> y.left)
-            x)
-        (fun x -> x.up)
-        node;
-    node.left.right <- node;
-    node.right.left <- node;
-    ;;
+  (* Go across each row in the column, adding it back. *)
+  node_iter
+    (fun x -> (* shaker *)
+      node_iter
+        (fun y -> (* shaker *)
+          y.down.up <- y; 
+          y.up.down <- y; 
+          update_count y 1;)
+        (fun y -> y.left) (* mover *)
+        x)
+    (fun x -> x.up) (* mover *)
+    node;
+  node.left.right <- node;
+  node.right.left <- node;
+;;
 
 let rec one_level_flatten (nested : 'a list list list) =
-    match nested with
-        | elems :: rest -> (one_level_flatten rest) @ elems
-        | []            -> []
-    ;;
+  match nested with
+    | elems :: rest -> (one_level_flatten rest) @ elems
+    | []            -> []
+;;
 
 let rec dlx_x (sol : int list) (grid : Types.dlx_matrix) =
-    if grid.count = 0 then [sol]
-    else 
-        begin
-            let col = find_least_filled_col grid in
-            let rows = find_covered_rows col in
-            cover_reassign col;
-            let sols = List.map
-                (
-                    fun row -> 
-                    (node_iter
-                        (fun x -> cover_reassign x.col_h)
-                        (fun x -> x.right)
-                        row;
-                     let new_sol = dlx_x (row.row :: sol) grid in
-                     node_iter
-                        (fun x -> uncover_reassign x.col_h)
-                        (fun x -> x.left)
-                        row;
-                     new_sol)
-                )
-                rows
-                in
-            uncover_reassign col;
-            one_level_flatten sols
-        end
-    ;;
+  if grid.mcount = 0 then [sol]
+  else begin
+    let (col,count) = find_least_filled_col grid in
+    if count = 0 then [sol] (* Unsuccessful. *)
+    else begin
+      let rows = find_covered_rows col in
+      cover_reassign col;
+      let sols = List.map (fun row -> 
+        node_iter
+          (fun x -> cover_reassign x.col_h)
+          (fun x -> x.right)
+          row;
+        let new_sol = dlx_x (row.row :: sol) grid in
+          node_iter
+            (fun x -> uncover_reassign x.col_h)
+            (fun x -> x.left)
+            row;
+         new_sol
+      ) rows in
+      uncover_reassign col;
+      one_level_flatten sols end
+  end
+;;
+
 (* DANCING LINKS END *)
 
 (* We return a list of tiles and their locations when we're done. *)
