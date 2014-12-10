@@ -24,8 +24,8 @@ print_endline (Utils.string_of_tile largest_tile);;
 Display.draw_display (Solution []) board;;
 
 let reflect = if reflect_str = "--reflect" then true else false;;
-print_endline (if reflect then "(* Reflections enabled *)" else "(* Reflections
-disallowed *)");;
+print_endline (if reflect then "(* Reflections enabled *)" 
+               else "(* Reflections disallowed *)");;
 
 print_endline "(* Solving *)";;
 let config = Configuration(tiles, Board(blank_board));;

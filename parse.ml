@@ -104,6 +104,12 @@ let chunk_by_bounds (bounds : (int * int) list) (grid : char array array) : char
         else finish))
     bounds
   ;;
+(*
+let remove_padding (shape : char array array) =
+  let trans_shape = transpose shape '0' in
+  let blank_cols = find_blank trans_shape ' ' in
+  let blank_rows = find_blank shape ' ' in
+  let slim_shape = List.filteri (fun idx _ -> not idx*)
 
 (*
  * Function to parse an array of arrays representing the initial input
