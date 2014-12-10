@@ -21,6 +21,7 @@ let largest_tile = Tile(largest_tile);;
 
 print_endline "(* Printing board *)";;
 print_endline (Utils.string_of_tile largest_tile);;
+Display.draw_display (Solution []) board;;
 
 let reflect = if reflect_str = "--reflect" then true else false;;
 print_endline (if reflect then "(* Reflections enabled *)" else "(* Reflections
