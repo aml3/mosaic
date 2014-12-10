@@ -36,4 +36,5 @@ let rec brute_force (intermediate_state : Types.configuration)
 
 let solve (blank_config : Types.configuration) =
   let empty_solution = Solution [] in
+  brute_force blank_config empty_solution
 ;;
