@@ -34,7 +34,7 @@ let rec brute_force (intermediate_state : Types.configuration)
     with Found_solution solution -> (true, solution)
 ;;
 
-let solve (blank_config : Types.configuration) =
+let solve (blank_config : Types.configuration) (reflect : bool) =
   let empty_solution = Solution [] in
   brute_force blank_config empty_solution
 ;;
