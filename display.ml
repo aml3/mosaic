@@ -9,6 +9,7 @@ let empty_color = Graphics.white;;
 let missing_color = Graphics.black;;
 
 let undraw_array (arr : cell array array) =
+  let orig_x = Graphics.current_x () in
   Array.iteri (fun i row -> 
     Array.iteri (fun j _ ->
       begin match row.(j) with
@@ -23,7 +24,7 @@ let undraw_array (arr : cell array array) =
       Graphics.rmoveto cell_width 0;
     ) row;
     Graphics.rmoveto 0 (-1*cell_height);
-    Graphics.moveto 0 (Graphics.current_y ());
+    Graphics.moveto orig_x (Graphics.current_y ());
   ) arr
 ;;
 
@@ -34,6 +35,7 @@ let undraw_tile (tile : Types.tile) =
 
 let draw_array (arr : cell array array)
                (flag : bool) (* Redraw previous contents. *) =
+  let orig_x = Graphics.current_x () in
   Array.iteri (fun i row ->
     Array.iteri (fun j _ ->
       let curr_x = Graphics.current_x () in
@@ -56,7 +58,7 @@ let draw_array (arr : cell array array)
       Graphics.rmoveto cell_width 0;
     ) row;
     Graphics.rmoveto 0 (-1*cell_height);
-    Graphics.moveto 0 (Graphics.current_y ());
+    Graphics.moveto orig_x (Graphics.current_y ());
   ) arr
 ;;
 
@@ -124,8 +126,19 @@ let draw_display (solution : Types.solution) (board : Types.board) =
           begin match current with
           | None -> ()
           | Some(tile, coors) ->
+            let (x,y) = coors in 
+            print_string "before remap: ";
+            print_int x;
+            print_string " ";
+            print_int y;
+            print_newline ();
             let (x,y) = remap coors dim_y in
             Graphics.moveto (x*cell_width) (y*cell_height);
+            print_string ("drawing at ");
+            print_int x;
+            print_string " ";
+            print_int y;
+            print_endline (": \n"^Utils.string_of_tile tile);
             draw_tile tile false; end;
           let (right, left) = scroll right left in
           loop left right true 
