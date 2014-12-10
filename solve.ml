@@ -26,6 +26,7 @@ let all_zeros (rows : (int * (int list)) list) =
  * NOTE: We'll have to keep rows and cols in sync. Is there a better way to 
  * handle dancing links? I think arrays will cause lots of pain later on.
  *)
+(* Commented b/c dancing links exists
 let rec algorithm_x (rows : (int * (int list)) list)
                     (cols : (int * (int list)) list)
                     (selection : int list) (* Indices of rows in the cover *) =
@@ -61,6 +62,96 @@ let rec algorithm_x (rows : (int * (int list)) list)
     let selection = r_i :: selection in
     algorithm_x rows cols selection
 ;;
+*)
+
+(* DANCING LINKS START *)
+
+let find_least_filled_col (grid : Types.dlx_matrix) =
+    let rec rec_find_least_filled (min : int) (curr_best : Types.dlx_node) (curr : Types.dlx_node) =
+        if curr == grid.head then curr_best
+        else 
+            if curr.count < min then rec_find_least_filled curr.count curr curr.right
+            else rec_find_least_filled min curr_best curr.right
+        in
+    rec_find_least_filled grid.head.count grid.head grid.head.right
+    ;;
+
+let find_covered_rows (col_hdr : Types.dlx_node) =
+    let rec rec_find_covered_rows (curr : Types.dlx_node) = 
+        if curr == col_hdr then []
+        else match curr.content with 
+                | Filled _ -> curr :: (rec_find_covered_rows curr.down)
+                | _        -> rec_find_covered_rows curr.down
+        in
+    rec_find_covered_rows col_hdr.down
+    ;;
+
+let node_iter (shaker : Types.dlx_node -> 'a) (mover : Types.dlx_node -> Types.dlx_node) (start : Types.dlx_node) =
+    let rec node_iter_rec (curr : Types.dlx_node) =
+        if curr != start
+        then (shaker curr; node_iter_rec (mover curr))
+    in
+    node_iter_rec (mover start)
+    ;;
+
+let cover_reassign (node : Types.dlx_node) =
+    node.right.left <- node.left;
+    node.left.right <- node.right;
+    node_iter
+        (fun x -> node_iter 
+            (fun y -> (y.down.up <- y.up; y.up.down <- y.down; y.col_h.count <- y.col_h.count - 1))
+            (fun y -> y.right)
+            x)
+        (fun x -> x.down)
+        node
+    ;;
+
+let uncover_reassign (node : Types.dlx_node) =
+    node_iter
+        (fun x -> node_iter
+            (fun y -> (y.down.up < y; y.up.down <- y; y.col_h.count <- y.col_h.count + 1))
+            (fun y -> y.left)
+            x)
+        (fun x -> x.up)
+        node;
+    node.left.right <- node;
+    node.right.left <- node;
+    ;;
+
+let rec one_level_flatten (nested : 'a list list list) =
+    match nested with
+        | elems :: rest -> (one_level_flatten rest) @ elems
+        | []            -> []
+    ;;
+
+let rec dlx_x (sol : int list) (grid : Types.dlx_matrix) =
+    if grid.count = 0 then [sol]
+    else 
+        begin
+            let col = find_least_filled_col grid in
+            let rows = find_covered_rows col in
+            cover_reassign col;
+            let sols = List.map
+                (
+                    fun row -> 
+                    (node_iter
+                        (fun x -> cover_reassign x.col_h)
+                        (fun x -> x.right)
+                        row;
+                     let new_sol = dlx_x (row.row :: sol) grid in
+                     node_iter
+                        (fun x -> uncover_reassign x.col_h)
+                        (fun x -> x.left)
+                        row;
+                     new_sol)
+                )
+                rows
+                in
+            uncover_reassign col;
+            one_level_flatten sols
+        end
+    ;;
+(* DANCING LINKS END *)
 
 (* We return a list of tiles and their locations when we're done. *)
 exception Found_solution of Types.solution;;

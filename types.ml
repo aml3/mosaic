@@ -18,4 +18,25 @@ type board = Board of cell array array;;
  *)
 type configuration = Configuration of (tile list) * board;;
 
+(* A solution is represented as an assignment of tiles to positions *)
 type solution = Solution of (tile * (int * int)) list;;
+
+(* The node type for the Dancing Links algorithm *)
+type dlx_node = {
+    mutable left : dlx_node;
+    mutable right : dlx_node;
+    mutable up :dlx_node;
+    mutable down : dlx_node;
+    mutable col_h : dlx_node;
+
+    content : cell;
+    row : int;
+    col : int;
+    mutable count : int;
+};;
+
+(* The sparse matrix type for the Dancing Links algorithm *)
+type dlx_matrix = {
+    head : dlx_node;
+    count : int
+};;
