@@ -135,22 +135,40 @@ let eqclass_of_tile (tile : Types.tile) =
   !eqclass
 ;;
 
-let row_of_eqclass (dim_x : int)
+let indices_of_tile (tile : Types.tile) =
+  let indices = ref [] in
+  Array.iteri (fun i row ->
+    Array.iteri (fun j _ -> indices := (j,i) :: !indices;) row) tiles in
+  !indices
+;;
+
+let rows_of_eqclass (dim_x : int)
                    (nclasses : int)
                    (board : cell array array)
                    (eqclass : Types.tile list) = 
   (* For each spot on the board, filter the eqclass by tiles that can fit at
    * that spot. Note that we have to do this for every tile, since rotations may
    * not by symmetric. *)
+  let rows = ref [] in
   let empty_row = Array.make dim_x 0 in
   Array.iteri (fun i board_row ->
     Array.iteri (fun j board_e ->
-      List.iteri (fun Tile(tile) ->
-        let is_valid = valid_placement_arr tile j i board in
-                
-      ) eqclass;
+      let valid_tiles = List.filter (fun Tile(tile) ->
+        valid_placement_arr tile j i board) eqclass in
+      (* For each of these valid tiles, we make a new row. *)
+      List.iter (fun valid_tile ->
+        let eqclass_row = Array.copy empty_row in
+        let indices = List.map (fun (x,y) -> (* translate the indices *)
+          (x+j, y+i)) (indices_of_tile valid_tile) in
+        let flat_indices = List.map (fun (x,y) -> x + y*dim_x) indices in
+        (* Set each spot in the row corresponding to an index to 1 in the
+         * equivalence class's row. *)
+        List.iteri(fun index -> eqclass_row.(nclasses+index) <- 1) flat_indices;
+        rows := eqclass_row :: !rows;
+      ) tiles;
     ) board_row;
   ) board;
+  !rows
 ;;
 
 let make_dlx_grid (config : Types.configuration) =
@@ -170,11 +188,12 @@ let make_dlx_grid (config : Types.configuration) =
    * sparse matrix later. *)
   let num_tiles = List.length tiles in
   let Board(grid) = board in
-  let first_row =  grid.(0) in
+  let first_row = grid.(0) in
   let grid_size = (Array.length grid) * (Array.length first_row) in
   let dim_x = (num_tiles + grid_size) in
-  let rows = List.map 
-    (row_of_eqclass dim_x nclasses board) eqclasses in
+  let rows_list = List.map 
+    (rows_of_eqclass dim_x nclasses board) eqclasses in
+  (* TODO: Set correct column in row to prevent eqclass overlap. *)
   let rec root = { matrix = matrix;
                   left = root; 
                   right = root; 
