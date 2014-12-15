@@ -45,7 +45,7 @@ int main(void) {
             vector<int> covered = try_placement(i, x, y, rotate, reflect);
 
             node * tile_node = new node();
-            tile_node->used = true;
+            tile_node->removed = false;
             grid[i]->insert(tile_node);
 
             if (covered.size() == 0) continue;
@@ -53,7 +53,7 @@ int main(void) {
             node * prev = tile_node;
             for(int j = 0; j < covered.size(); ++j) {
               node * row_node = new node();
-              row_node->used = true;
+              row_node->removed = false;
               row_node->left = prev;
               row_node->right = prev->right;
               prev->right->left = row_node;
@@ -65,7 +65,7 @@ int main(void) {
 
             for (int z = 0; z < empty_indices.size(); z++) {
               node * row_node = new node();
-              row_node->used = true;
+              row_node->removed = false;
               row_node->left = prev;
               row_node->right = prev->right;
               prev->right->left = row_node;
@@ -86,7 +86,7 @@ int main(void) {
   count_sols(root, count);
 
   // Output count
-  cout << "Found " << count << " solutions!\n";
+  cout << "Found " << count << " solutions :D\n";
   return 0;
 }
 

@@ -11,7 +11,7 @@ class node {
     node * up;
     node * down;
     header * col_head;
-    bool used;
+    bool removed;
 
     node() {
       left = this;
@@ -19,7 +19,7 @@ class node {
       up = this;
       down = this;
       col_head = nullptr;
-      used = false;
+      removed = false;
     }
 
 };
@@ -32,7 +32,7 @@ class header : public node {
     header() {
       count = 0;
       col_head = this;
-      used = false;
+      removed = false;
       tile = false;
     }
 

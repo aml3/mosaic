@@ -36,21 +36,33 @@ void remove_col(header * col_head) {
   col_head->left->right = col_head->right;
 
   for(node * r = col_head->down; r != col_head; r = r->down) {
-    for(node * c = r->right; c != r; c = c->right) {
-      c->down->up = c->up;
-      c->up->down = c->down;
-      --col_head->count;
-    }
+    node * c = r->right;
+    do {
+      if (!c->removed) {
+        c->down->up = c->up;
+        c->up->down = c->down;
+        --col_head->count;
+
+        c->removed = true;
+      }
+      c = c->right;
+    } while (c != r);
   }
 }
 
 void replace_col(header * col_head) { 
   for(node * r = col_head->up; r != col_head; r = r->up) {
-    for(node * c = r->left; c != r; c = c->left) {
-      c->down->up = c;
-      c->up->down = c;
-      ++col_head->count;
-    }
+    node * c = r->left;
+    do {
+      if (c->removed) {
+        c->down->up = c->up;
+        c->up->down = c->down;
+        --col_head->count;
+
+        c->removed = false;
+      }
+      c = c->left;
+    } while (c != r);
   }
 
   col_head->right->left = col_head;
@@ -60,8 +72,9 @@ void replace_col(header * col_head) {
 void count_sols(header * root, int & counter) {
   cout << "entering count_sols" << endl;
   header * root_left = (header *) root->left;
-  if(root_left == root || root_left->tile == true) {
+  if(root_left->tile == true) {
     ++counter;
+    cout << "**** found a solution" << endl;
     return;
   }
 
@@ -73,6 +86,7 @@ void count_sols(header * root, int & counter) {
   cout << "entering while loop" << endl;
 
   while(next != least_full) {
+    cout << "asdf" << endl;
     for(node * iter = next->right; iter != next; iter = iter->right)
       remove_col(iter->col_head);
     count_sols(root, counter);
@@ -81,4 +95,5 @@ void count_sols(header * root, int & counter) {
     next = next->down;
   }
   replace_col(least_full);
+  cout << "exiting the while loop" << endl;
 }
