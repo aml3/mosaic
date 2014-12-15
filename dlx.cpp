@@ -55,12 +55,14 @@ void replace_col(header * col_head) {
 }
 
 void count_sols(header * root, int & counter) {
-  if(root->right == root || root->right->tile == true) {
+  header * root_right = (header *) root->right;
+  if(root_right == root || root_right->tile == true) {
     ++counter;
     return;
   }
 
   header * least_full = find_least_full(root);
+  if (least_full->count == 0) return;
   remove_col(least_full);
   node * next = least_full->down;
 

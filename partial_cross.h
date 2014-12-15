@@ -66,18 +66,18 @@ int piece12[3][3] = {
   {0, 1, 1} };
 
 int num_pieces = 12;
-int* pieces[12] = { (int*) piece1
-                  , (int*) piece2
-                  , (int*) piece3
-                  , (int*) piece4
-                  , (int*) piece5
-                  , (int*) piece6
-                  , (int*) piece7
-                  , (int*) piece8
-                  , (int*) piece9
-                  , (int*) piece10
-                  , (int*) piece11
-                  , (int*) piece12};
+int** pieces[12] = { (int**) piece1
+                   , (int**) piece2
+                   , (int**) piece3
+                   , (int**) piece4
+                   , (int**) piece5
+                   , (int**) piece6
+                   , (int**) piece7
+                   , (int**) piece8
+                   , (int**) piece9
+                   , (int**) piece10
+                   , (int**) piece11
+                   , (int**) piece12 };
 
 int piecedims_x[12] = { 3, 2, 3, 3, 3, 4, 3, 5, 4, 3, 4, 3 };
 int piecedims_y[12] = { 3, 3, 3, 3, 3, 2, 3, 1, 2, 2, 2, 3 };
