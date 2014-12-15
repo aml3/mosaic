@@ -167,5 +167,7 @@ vector<int> try_placement(int idx, int x, int y, int rotate, int reflect) {
     }
   }
 
+  cleanup(tile, dim_x, dim_y);
+
   return indices;
 }
