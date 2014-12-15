@@ -27,11 +27,13 @@ class node {
 class header : public node {
   public:
     int count;
+    bool tile;
 
     header() {
       count = 0;
       col_head = this;
       used = false;
+      tile = false;
     }
 
     void insert(node * item);

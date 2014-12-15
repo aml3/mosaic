@@ -55,7 +55,7 @@ void replace_col(header * col_head) {
 }
 
 void count_sols(header * root, int & counter) {
-  if(root->right == root) {
+  if(root->right == root || root->right->tile == true) {
     ++counter;
     return;
   }
