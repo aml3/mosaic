@@ -11,61 +11,61 @@ tile piece1 = {
   row({0, 1, 0}),
   row({0, 1, 0}) };
 
-vector<row > piece2 = {
+tile piece2 = {
   row({1, 0, 1}),
   row({1, 1, 1}) };
 
-vector<row > piece3 = {
+tile piece3 = {
   row({1, 0, 0}),
   row({1, 0, 0}),
   row({1, 1, 1}) };
 
-vector<row > piece4 = {
+tile piece4 = {
   row({1, 0, 0}),
   row({1, 1, 0}),
   row({0, 1, 1}) };
 
-vector<row > piece5 = {
+tile piece5 = {
   row({0, 1, 0}),
   row({1, 1, 1}),
   row({0, 1, 0}) };
 
-vector<row > piece6 = {
+tile piece6 = {
   row({1, 0}),
   row({1, 0}),
   row({1, 1}),
   row({1, 0}) };
 
-vector<row > piece7 = {
+tile piece7 = {
   row({0, 1, 1}),
   row({1, 1, 0}),
   row({0, 1, 0}) };
 
-vector<row > piece8 = {
+tile piece8 = {
   row({1}),
   row({1}),
   row({1}),
   row({1}),
   row({1}) };
 
-vector<row > piece9 = {
+tile piece9 = {
   row({1, 0}),
   row({1, 0}),
   row({1, 0}),
   row({1, 1}) };
 
-vector<row > piece10 = {
+tile piece10 = {
   row({1, 1}),
   row({1, 1}),
   row({1, 0}) };
 
-vector<row > piece11 = {
+tile piece11 = {
   row({0, 1}),
   row({0, 1}),
   row({1, 1}),
   row({1, 0}) };
 
-vector<row > piece12 = {
+tile piece12 = {
   row({1, 1, 0}),
   row({0, 1, 0}),
   row({0, 1, 1}) };
