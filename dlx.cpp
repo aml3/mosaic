@@ -2,15 +2,15 @@
 using namespace std;
 
 pair<header *, vector<header *> > initialize(int num_cols) {
-  vector<header *> instance; // will this be garbage collected when initialize() returns?
+  vector<header *> instance; 
   instance.reserve(num_cols);
   header * root = new header();
   for (int i = 0; i < num_cols; ++i) {
     instance[i] = new header();
-    instance[i]->left = root;
-    instance[i]->right = root->right;
-    root->right->left = instance[i];
-    root->right = instance[i];
+    instance[i]->left = root->left;
+    instance[i]->right = root;
+    root->left->right = instance[i];
+    root->left = instance[i];
   }
 
   pair<header *, vector<header *> > result(root, instance);
@@ -18,9 +18,9 @@ pair<header *, vector<header *> > initialize(int num_cols) {
 }
 
 header * find_least_full(header * root) {
-  header * least = (header *)root->left;
+  header * least = (header *)root->right;
 
-  for(header * iter = least; iter != root; iter = (header *)iter->left) {
+  for(header * iter = least; iter != root; iter = (header *)iter->right) {
     if(iter->count < least->count)
       least = iter;
   }
