@@ -3,76 +3,76 @@
 
 #include <vector>
 using namespace std;
-typdef vector<vector<int > > tile;
+typedef vector<vector<int > > tile;
 typedef vector<int> row;
 
 tile piece1 = {
   row({1, 1, 1}),
-  vector<int>({0, 1, 0}),
-  vector<int>({0, 1, 0}) };
+  row({0, 1, 0}),
+  row({0, 1, 0}) };
 
-vector<vector<int> > piece2 = {
-  vector<int>({1, 0, 1}),
-  vector<int>({1, 1, 1}) };
+vector<row > piece2 = {
+  row({1, 0, 1}),
+  row({1, 1, 1}) };
 
-vector<vector<int> > piece3 = {
-  vector<int>({1, 0, 0}),
-  vector<int>({1, 0, 0}),
-  vector<int>({1, 1, 1}) };
+vector<row > piece3 = {
+  row({1, 0, 0}),
+  row({1, 0, 0}),
+  row({1, 1, 1}) };
 
-vector<vector<int> > piece4 = {
-  vector<int>({1, 0, 0}),
-  vector<int>({1, 1, 0}),
-  vector<int>({0, 1, 1}) };
+vector<row > piece4 = {
+  row({1, 0, 0}),
+  row({1, 1, 0}),
+  row({0, 1, 1}) };
 
-vector<vector<int> > piece5 = {
-  vector<int>({0, 1, 0}),
-  vector<int>({1, 1, 1}),
-  vector<int>({0, 1, 0}) };
+vector<row > piece5 = {
+  row({0, 1, 0}),
+  row({1, 1, 1}),
+  row({0, 1, 0}) };
 
-vector<vector<int> > piece6 = {
-  vector<int>({1, 0}),
-  vector<int>({1, 0}),
-  vector<int>({1, 1}),
-  vector<int>({1, 0}) };
+vector<row > piece6 = {
+  row({1, 0}),
+  row({1, 0}),
+  row({1, 1}),
+  row({1, 0}) };
 
-vector<vector<int> > piece7 = {
-  vector<int>({0, 1, 1}),
-  vector<int>({1, 1, 0}),
-  vector<int>({0, 1, 0}) };
+vector<row > piece7 = {
+  row({0, 1, 1}),
+  row({1, 1, 0}),
+  row({0, 1, 0}) };
 
-vector<vector<int> > piece8 = {
-  vector<int>({1}),
-  vector<int>({1}),
-  vector<int>({1}),
-  vector<int>({1}),
-  vector<int>({1}) };
+vector<row > piece8 = {
+  row({1}),
+  row({1}),
+  row({1}),
+  row({1}),
+  row({1}) };
 
-vector<vector<int> > piece9 = {
-  vector<int>({1, 0}),
-  vector<int>({1, 0}),
-  vector<int>({1, 0}),
-  vector<int>({1, 1}) };
+vector<row > piece9 = {
+  row({1, 0}),
+  row({1, 0}),
+  row({1, 0}),
+  row({1, 1}) };
 
-vector<vector<int> > piece10 = {
-  vector<int>({1, 1}),
-  vector<int>({1, 1}),
-  vector<int>({1, 0}) };
+vector<row > piece10 = {
+  row({1, 1}),
+  row({1, 1}),
+  row({1, 0}) };
 
-vector<vector<int> > piece11 = {
-  vector<int>({0, 1}),
-  vector<int>({0, 1}),
-  vector<int>({1, 1}),
-  vector<int>({1, 0}) };
+vector<row > piece11 = {
+  row({0, 1}),
+  row({0, 1}),
+  row({1, 1}),
+  row({1, 0}) };
 
-vector<vector<int> > piece12 = {
-  vector<int>({1, 1, 0}),
-  vector<int>({0, 1, 0}),
-  vector<int>({0, 1, 1}) };
+vector<row > piece12 = {
+  row({1, 1, 0}),
+  row({0, 1, 0}),
+  row({0, 1, 1}) };
 
 int num_pieces = 12;
-vector<vector<vector<int > > >  pieces = 
-  vector<vector<vector< int> > >({ piece1
+vector<tile>  pieces = vector<tile>(
+  { piece1
   , piece2
   , piece3
   , piece4
