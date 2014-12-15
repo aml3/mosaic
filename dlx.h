@@ -7,7 +7,7 @@
 
 using namespace std;
 
-pair<header *, vector<header *> > initialize(int num_cols);
+pair<header *, vector<header *> > initialize(int num_cols, int num_pieces);
 header * find_least_full(header * root);
 void remove_col(header * col_head);
 void replace_col(header * col_head);
