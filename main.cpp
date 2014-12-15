@@ -26,6 +26,7 @@ int main(void) {
       }
     }
   }
+  cout << empty_indices.size() << " empty indices" << endl;
 
   // Build the grid
   // First, properly set tile flags
