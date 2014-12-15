@@ -2,7 +2,7 @@
 using namespace std;
 
 pair<header *, vector<header *> > initialize(int num_cols) {
-  vector<header *> instance;
+  vector<header *> instance; // will this be garbage collected when initialize() returns?
   instance.reserve(num_cols);
   header * root = new header();
   for (int i = 0; i < num_cols; ++i) {
@@ -13,7 +13,7 @@ pair<header *, vector<header *> > initialize(int num_cols) {
     root->right = instance[i];
   }
 
-  pair<header *, vector<header *>> result(root, instance);
+  pair<header *, vector<header *> > result(root, instance);
   return result;
 }
 
