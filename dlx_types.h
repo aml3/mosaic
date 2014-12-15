@@ -5,6 +5,7 @@
 #include <vector>
 #include <stack>
 #include <tuple>
+#include <utility>
 using namespace std;
 typedef vector<vector<int > > tile;
 typedef vector<int> row;
@@ -51,7 +52,7 @@ class header : public node {
 class matrix {
   public:
     stack<tuple<int, int, int, int> > placements;
-    int orientation;
+    pair<int,int> orientation;
     int** grid;
     int dim_x;
     int dim_y;
@@ -59,7 +60,7 @@ class matrix {
 
     matrix() {
       this->grid = nullptr;
-      this->orientation = 0;
+      this->orientation = make_pair(1,0);
       this->dim_x = 0;
       this->dim_y = 0;
       this->space = 0;

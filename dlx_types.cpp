@@ -10,8 +10,8 @@ void header::insert(node * item) {
 }
 
 void matrix::reflect() {
-  cout << "entering reflect" << endl;
-  this->orientation *= -1;
+  //cout << "entering reflect" << endl;
+  this->orientation.first *= -1;
 
   int ** temp = new int*[this->dim_y];
   for (int i = 0; i < this->dim_y; i++) {
@@ -32,7 +32,7 @@ void matrix::reflect() {
     delete [] temp[i];
   }
   delete [] temp;
-  cout << "exiting reflect" << endl;
+  //cout << "exiting reflect" << endl;
 }
 
 void matrix::rotate(int r) {
@@ -48,9 +48,13 @@ void matrix::reflect(int r) {
 }
 
 void matrix::rotate() {
-  cout << "entering rotate" << endl;
-  this->orientation += 1;
-  this->orientation %= 4;
+  //cout << "entering rotate" << endl;
+  if (this->orientation.second < 0) {
+    this->orientation.second -= 1;
+  } else {
+    this->orientation.second += 1;
+  }
+  this->orientation.second %= 4;
   
   int ** temp = new int*[this->dim_y];
   for (int i = 0; i < this->dim_y; i++) {
@@ -71,7 +75,7 @@ void matrix::rotate() {
     delete [] temp[i];
   }
   delete [] temp;
-  cout << "exiting rotate" << endl;
+  //cout << "exiting rotate" << endl;
 }
 
 void matrix::addPiece(int idx, tile &t, int tx, int ty, int x, int y) {
@@ -80,10 +84,10 @@ void matrix::addPiece(int idx, tile &t, int tx, int ty, int x, int y) {
     for (int j = 0; j < tx; ++j) {
       int board_i = i + y;
       int board_j = j + x;
-      cout << board_i << endl;
-      cout << board_j << endl;
-      this->grid[board_i][board_j] = t[i][j];
-      if (t[i][j] == 1) this->space--;
+      if (t[i][j] != 0) {
+        this->space--;
+        this->grid[board_i][board_j] = 8;//t[i][j];
+      }
     }
   }
   cout << "exiting add" << endl;
@@ -95,10 +99,14 @@ void matrix::removePiece(int idx, tile &t, int tx, int ty, int x, int y) {
     for (int j = 0; j < tx; ++j) {
       int board_i = i + x;
       int board_j = j + y;
-      cout << board_i << endl;
-      cout << board_j << endl;
-      this->grid[board_i][board_j] = 0;
-      if (t[i][j] == 1) this->space++;
+      if (t[i][j] != 0) {
+        this->grid[board_i][board_j] = 0;
+        this->space++;
+      }
+
+      if (t[i][j] != 0 && this->grid[board_i][board_j] == 0) {
+        cout << "wtf why is this happening" << endl;
+      }
     }
   }
   cout << "exiting remove" << endl;
