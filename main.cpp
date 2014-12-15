@@ -56,6 +56,7 @@ int main(void) {
 
               grid[covered[j]]->insert(row_node);
               prev = row_node;
+            }
           }
         }
       }
