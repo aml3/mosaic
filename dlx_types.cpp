@@ -1,6 +1,6 @@
 #include "dlx_types.h"
 
-void header::add(node * item) {
+void header::insert(node * item) {
   item->col_head = this;
   item->down = this;
   item->up = this->up;

@@ -18,7 +18,7 @@ class node {
       right = this;
       up = this;
       down = this;
-      col_head = NULL;
+      col_head = nullptr;
       used = false;
     }
 

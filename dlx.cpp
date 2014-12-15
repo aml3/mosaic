@@ -1,7 +1,7 @@
 #include "dlx.h"
 using namespace std;
 
-pair<header *, vector<header *>> initialize(int num_cols) {
+pair<header *, vector<header *> > initialize(int num_cols) {
   vector<header *> instance;
   instance.reserve(num_cols);
   header * root = new header();
@@ -18,9 +18,9 @@ pair<header *, vector<header *>> initialize(int num_cols) {
 }
 
 header * find_least_full(header * root) {
-  header * least = root->left;
+  header * least = (header *)root->left;
 
-  for(header * iter = least; iter != root; iter = iter->left) {
+  for(header * iter = least; iter != root; iter = (header *)iter->left) {
     if(iter->count < least->count)
       least = iter;
   }
@@ -54,17 +54,17 @@ void replace_col(header * col_head) {
   col_head->left->right = col_head;
 }
 
-void count_sols(header * root, int * counter) {
+void count_sols(header * root, int & counter) {
   if(root->right == root) {
-    ++(*counter);
+    ++counter;
     return;
   }
 
   header * least_full = find_least_full(root);
   remove_col(least_full);
-  node * next = header->down;
+  node * next = least_full->down;
 
-  while(next != header) {
+  while(next != least_full) {
     for(node * iter = next->right; iter != next; iter = iter->right)
       remove_col(iter->col_head);
     count_sols(root, counter);
@@ -72,5 +72,5 @@ void count_sols(header * root, int * counter) {
       replace_col(iter->col_head);
     next = next->down;
   }
-  replace_col(least_full)
+  replace_col(least_full);
 }
