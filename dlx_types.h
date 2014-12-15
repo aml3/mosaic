@@ -58,6 +58,9 @@ class matrix {
     int dim_y;
     int space;
 
+    int** temp1;
+    int** temp2;
+
     matrix() {
       this->grid = nullptr;
       this->orientation = make_pair(1,0);

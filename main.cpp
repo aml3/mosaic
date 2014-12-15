@@ -41,6 +41,15 @@ int main(void) {
       }
     }
   }
+
+  b.temp1 = new int*[b.dim_y];
+  for (int i = 0; i < b.dim_y; i++) {
+    b.temp1[i] = new int[b.dim_x];
+  }
+  b.temp2 = new int*[b.dim_x];
+  for (int i = 0; i < b.dim_x; i++) {
+    b.temp2[i] = new int[b.dim_y];
+  }
   
   int counter = 0;
   cout << "space=" << b.space << endl;
@@ -51,8 +60,9 @@ int main(void) {
   return 0;
 }
 
+int progress = 0;
 void brute_force(int &counter, int idx, matrix &b) {
-  print_matrix(b);
+  //print_matrix(b);
   if (b.space == 0) {
     counter++;
     return;
@@ -63,6 +73,8 @@ void brute_force(int &counter, int idx, matrix &b) {
         for (int rotate = 0; rotate < 4; ++rotate) {
           b.rotate(rotate);
           for (int reflect = 0; reflect < 2; ++reflect) {
+            progress++;
+            if (progress %50000 == 0) cout << progress << ": " << counter << endl;
             b.reflect(reflect);
             if (valid_placement(b, i, x, y)) {
               b.addPiece(i, pieces[i], piecedims_x[i], piecedims_y[i], x, y);
