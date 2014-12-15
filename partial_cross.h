@@ -1,83 +1,87 @@
 #ifndef CHECKERBOARD_H
 #define CHECKERBOARD_H
 
-int piece1[3][3] = {
-  {1, 1, 1},
-  {0, 1, 0},
-  {0, 1, 0} };
+#include <vector>
+using namespace std;
 
-int piece2[2][3] = {
-  {1, 0, 1},
-  {1, 1, 1} };
+vector<vector<int> > piece1 = {
+  vector<int>({1, 1, 1}),
+  vector<int>({0, 1, 0}),
+  vector<int>({0, 1, 0}) };
 
-int piece3[3][3] = {
-  {1, 0, 0},
-  {1, 0, 0},
-  {1, 1, 1} };
+vector<vector<int> > piece2 = {
+  vector<int>({1, 0, 1}),
+  vector<int>({1, 1, 1}) };
 
-int piece4[3][3] = {
-  {1, 0, 0},
-  {1, 1, 0},
-  {0, 1, 1} };
+vector<vector<int> > piece3 = {
+  vector<int>({1, 0, 0}),
+  vector<int>({1, 0, 0}),
+  vector<int>({1, 1, 1}) };
 
-int piece5[3][3] = {
-  {0, 1, 0},
-  {1, 1, 1},
-  {0, 1, 0} };
+vector<vector<int> > piece4 = {
+  vector<int>({1, 0, 0}),
+  vector<int>({1, 1, 0}),
+  vector<int>({0, 1, 1}) };
 
-int piece6[4][2] = {
-  {1, 0},
-  {1, 0},
-  {1, 1},
-  {1, 0} };
+vector<vector<int> > piece5 = {
+  vector<int>({0, 1, 0}),
+  vector<int>({1, 1, 1}),
+  vector<int>({0, 1, 0}) };
 
-int piece7[3][3] = {
-  {0, 1, 1},
-  {1, 1, 0},
-  {0, 1, 0} };
+vector<vector<int> > piece6 = {
+  vector<int>({1, 0}),
+  vector<int>({1, 0}),
+  vector<int>({1, 1}),
+  vector<int>({1, 0}) };
 
-int piece8[5][1] = {
-  {1},
-  {1},
-  {1},
-  {1},
-  {1} };
+vector<vector<int> > piece7 = {
+  vector<int>({0, 1, 1}),
+  vector<int>({1, 1, 0}),
+  vector<int>({0, 1, 0}) };
 
-int piece9[4][2] = {
-  {1, 0},
-  {1, 0},
-  {1, 0},
-  {1, 1} };
+vector<vector<int> > piece8 = {
+  vector<int>({1}),
+  vector<int>({1}),
+  vector<int>({1}),
+  vector<int>({1}),
+  vector<int>({1}) };
 
-int piece10[3][2] = {
-  {1, 1},
-  {1, 1},
-  {1, 0} };
+vector<vector<int> > piece9 = {
+  vector<int>({1, 0}),
+  vector<int>({1, 0}),
+  vector<int>({1, 0}),
+  vector<int>({1, 1}) };
 
-int piece11[4][2] = {
-  {0, 1},
-  {0, 1},
-  {1, 1},
-  {1, 0} };
+vector<vector<int> > piece10 = {
+  vector<int>({1, 1}),
+  vector<int>({1, 1}),
+  vector<int>({1, 0}) };
 
-int piece12[3][3] = {
-  {1, 1, 0},
-  {0, 1, 0},
-  {0, 1, 1} };
+vector<vector<int> > piece11 = {
+  vector<int>({0, 1}),
+  vector<int>({0, 1}),
+  vector<int>({1, 1}),
+  vector<int>({1, 0}) };
+
+vector<vector<int> > piece12 = {
+  vector<int>({1, 1, 0}),
+  vector<int>({0, 1, 0}),
+  vector<int>({0, 1, 1}) };
 
 int num_pieces = 12;
-int** pieces[12] = { (int**) piece1
-                   , (int**) piece2
-                   , (int**) piece3
-                   , (int**) piece4
-                   , (int**) piece5
-                   , (int**) piece6
-                   , (int**) piece7
-                   , (int**) piece8
-                   , (int**) piece9
-                   , (int**) piece10
-                   , (int**) piece11
-                   , (int**) piece12 };
+vector<vector<vector<int > > >  pieces = 
+  vector<vector<vector< int> > >({ piece1
+  , piece2
+  , piece3
+  , piece4
+  , piece5
+  , piece6
+  , piece7
+  , piece8
+  , piece9
+  , piece10
+  , piece11
+  , piece12 });
 
 int piecedims_x[12] = { 3, 3, 3, 3, 3, 2, 3, 1, 2, 2, 2, 3 };
 int piecedims_y[12] = { 3, 2, 3, 3, 3, 4, 3, 5, 4, 3, 4, 3 };
