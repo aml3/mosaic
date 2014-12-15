@@ -36,6 +36,7 @@ int main(void) {
             node * prev = nullptr;
             for(int j = 0; j < covered.size(); ++j) {
               node * row_node = new node();
+              row_node->used = true;
               if(first) {
                 first = false;
               }
