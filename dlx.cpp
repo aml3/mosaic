@@ -41,7 +41,7 @@ void remove_col(header * col_head) {
       if (!c->removed) {
         c->down->up = c->up;
         c->up->down = c->down;
-        --col_head->count;
+        --c->col_head->count;
 
         c->removed = true;
       }
@@ -57,7 +57,7 @@ void replace_col(header * col_head) {
       if (c->removed) {
         c->down->up = c->up;
         c->up->down = c->down;
-        --col_head->count;
+        ++c->col_head->count;
 
         c->removed = false;
       }
