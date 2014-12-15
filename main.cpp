@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <tuple>
+#include <algorithm>
 
 using namespace std;
 
@@ -48,9 +49,15 @@ int main(void) {
               }
 
               grid[covered[j]]->insert(row_node);
-              grid[i]->insert(row_node);
               prev = row_node;
             }
+
+            node * tile_node = new node();
+            tile_node->left = prev;
+            tile_node->right = prev->right;
+            prev->right->left = tile_node;
+            prev->right = tile_node;
+            grid[num_cols - num_pieces + i - 1]->insert(tile_node);
           }
         }
       }
@@ -173,6 +180,6 @@ vector<int> try_placement(int idx, int x, int y, int rotate, int reflect) {
   }
 
   cleanup(tile, dim_x, dim_y);
-
+  sort(indices.begin(), indices.end());
   return indices;
 }

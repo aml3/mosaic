@@ -68,6 +68,7 @@ void count_sols(header * root, int & counter) {
   if (least_full->count == 0) return;
   remove_col(least_full);
   node * next = least_full->down;
+  cout << "entering while loop" << endl;
 
   while(next != least_full) {
     for(node * iter = next->right; iter != next; iter = iter->right)
