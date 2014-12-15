@@ -6,5 +6,5 @@ void header::insert(node * item) {
   item->up = this->up;
   this->up->down = item;
   this->up = item;
-  ++count;
+  ++this->count;
 }

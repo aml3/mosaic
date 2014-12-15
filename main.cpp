@@ -20,7 +20,7 @@ int main(void) {
   // Build the grid
   // First, properly set tile flags
   for(int i = 0; i < num_pieces; ++i){ 
-    grid[i]->tile = true;
+    grid[num_cols - num_pieces + i - 1]->tile = true;
   }
 
   // Next, add rows for placements
@@ -29,17 +29,9 @@ int main(void) {
       for(int y = 0; y < board_y; ++y) {
         for (int rotate = 0; rotate < 4; ++rotate) {
           for (int reflect = 0; reflect < 2; ++reflect) {
-            //cout << i << " " << x << " " << y << " " << rotate << " " << reflect << endl;
             vector<int> covered = try_placement(i, x, y, rotate, reflect);
-           /* auto covered_iter = covered.cbegin();
-            node * prev_node = nullptr;
-            for(int j = 0; j < num_cols; ++j) {
-              node * row_node = new node();
-              row_node->used = (j == i || j == *covered_iter);
-              if(j == *covered_iter) ++covered_iter;
-              row_node->
-              grid[j]->insert(row_node);
-            }*/
+            if (covered.size() == 0) continue;
+
             bool first = true;
             node * prev = nullptr;
             for(int j = 0; j < covered.size(); ++j) {
@@ -55,7 +47,9 @@ int main(void) {
               }
 
               grid[covered[j]]->insert(row_node);
+              grid[i]->insert(row_node);
               prev = row_node;
+            }
           }
         }
       }

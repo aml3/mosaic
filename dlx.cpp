@@ -57,6 +57,7 @@ void replace_col(header * col_head) {
 }
 
 void count_sols(header * root, int & counter) {
+  cout << "entering count_sols" << endl;
   header * root_right = (header *) root->right;
   if(root_right == root || root_right->tile == true) {
     ++counter;
