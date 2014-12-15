@@ -58,12 +58,13 @@ void replace_col(header * col_head) {
 
 void count_sols(header * root, int & counter) {
   cout << "entering count_sols" << endl;
-  header * root_right = (header *) root->right;
-  if(root_right == root || root_right->tile == true) {
+  header * root_left = (header *) root->left;
+  if(root_left == root || root_left->tile == true) {
     ++counter;
     return;
   }
 
+  cout << "checking least full" << endl;
   header * least_full = find_least_full(root);
   if (least_full->count == 0) return;
   remove_col(least_full);

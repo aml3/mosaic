@@ -18,10 +18,19 @@ int main(void) {
   header * root = grid_pair.first;
   vector<header *> grid = grid_pair.second;
 
+  vector<int> empty_indices;
+  for (int i = 0; i < board_y; i++) {
+    for (int j = 0; j < board_x; j++) {
+      if (board[i][j] == 0) {
+        empty_indices.push_back(j + i * board_x);
+      }
+    }
+  }
+
   // Build the grid
   // First, properly set tile flags
   for(int i = 0; i < num_pieces; ++i){ 
-    grid[num_cols - num_pieces + i - 1]->tile = true;
+    grid[i]->tile = true;
   }
 
   // Next, add rows for placements
@@ -52,17 +61,29 @@ int main(void) {
               prev = row_node;
             }
 
+            for (int z = 0; z < empty_indices.size(); z++) {
+              node * row_node = new node();
+              row_node->used = true;
+              row_node->left = prev;
+              row_node->right = prev->right;
+              prev->right->left = row_node;
+              prev->right = row_node;
+              grid[empty_indices[z]]->insert(row_node);
+              prev = row_node;
+            }
+
             node * tile_node = new node();
             tile_node->left = prev;
             tile_node->right = prev->right;
             prev->right->left = tile_node;
             prev->right = tile_node;
-            grid[num_cols - num_pieces + i - 1]->insert(tile_node);
+            grid[i]->insert(tile_node);
           }
         }
       }
     }
   }
+
   cout << "passed for loops" << endl;
 
   // Get count 
