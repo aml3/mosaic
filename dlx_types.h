@@ -58,8 +58,7 @@ class matrix {
     int dim_y;
     int space;
 
-    int** temp1;
-    int** temp2;
+    int** temp;
 
     matrix() {
       this->grid = nullptr;

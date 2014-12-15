@@ -13,19 +13,15 @@ void matrix::reflect() {
   //cout << "entering reflect" << endl;
   this->orientation.first *= -1;
 
-  int ** temp = this->temp1;
-  if (this->orientation.second % 2 == 1) {
-    temp = this->temp2;
-  }
   for (int i = 0; i < this->dim_y; i++) {
     for (int j = 0; j < this->dim_x; j++) {
-      temp[i][j] = this->grid[i][j];
+      this->temp[i][j] = this->grid[i][j];
     }
   }
   
   for (int i = 0; i < this->dim_y; i++) {
     for (int j = 0; j < this->dim_x; j++) {
-      this->grid[this->dim_y - i - 1][j] = temp[i][j];
+      this->grid[this->dim_y - i - 1][j] = this->temp[i][j];
     }
   }
 
@@ -45,26 +41,18 @@ void matrix::reflect(int r) {
 
 void matrix::rotate() {
   //cout << "entering rotate" << endl;
-  if (this->orientation.second < 0) {
-    this->orientation.second -= 1;
-  } else {
-    this->orientation.second += 1;
-  }
+  this->orientation.second += 1;
   this->orientation.second %= 4;
   
-  int ** temp = this->temp1;
-  if (this->orientation.second % 2 == 1) {
-    temp = this->temp2;
-  }
   for (int i = 0; i < this->dim_y; i++) {
     for (int j = 0; j < this->dim_x; j++) {
-      temp[i][j] = this->grid[i][j];
+      this->temp[i][j] = this->grid[i][j];
     }
   }
   
   for (int i = 0; i < this->dim_y; ++i) {
     for (int j = 0; j < this->dim_x; ++j) {
-      this->grid[j][dim_y - 1 - i] = temp[i][j];
+      this->grid[j][dim_y - 1 - i] = this->temp[i][j];
     }
   }
 }

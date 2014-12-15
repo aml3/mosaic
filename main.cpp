@@ -6,6 +6,7 @@
 #include <tuple>
 #include <algorithm>
 #include <sstream>
+#include <cassert>
 
 using namespace std;
 
@@ -42,13 +43,9 @@ int main(void) {
     }
   }
 
-  b.temp1 = new int*[b.dim_y];
+  b.temp = new int*[b.dim_y];
   for (int i = 0; i < b.dim_y; i++) {
-    b.temp1[i] = new int[b.dim_x];
-  }
-  b.temp2 = new int*[b.dim_x];
-  for (int i = 0; i < b.dim_x; i++) {
-    b.temp2[i] = new int[b.dim_y];
+    b.temp[i] = new int[b.dim_x];
   }
   
   int counter = 0;
@@ -62,6 +59,9 @@ int main(void) {
 
 int progress = 0;
 void brute_force(int &counter, int idx, matrix &b) {
+  int aa = b.orientation.first;
+  int bb = b.orientation.second;
+  cout << idx << endl;
   //print_matrix(b);
   if (b.space == 0) {
     counter++;
@@ -74,7 +74,7 @@ void brute_force(int &counter, int idx, matrix &b) {
           b.rotate(rotate);
           for (int reflect = 0; reflect < 2; ++reflect) {
             progress++;
-            if (progress %50000 == 0) cout << progress << ": " << counter << endl;
+            if (progress %50000 == 0) cout << progress << ": " << b.space << endl;
             b.reflect(reflect);
             if (valid_placement(b, i, x, y)) {
               b.addPiece(i, pieces[i], piecedims_x[i], piecedims_y[i], x, y);
@@ -88,6 +88,8 @@ void brute_force(int &counter, int idx, matrix &b) {
       }
     }
   }
+  assert(aa = b.orientation.first);
+  assert(bb = b.orientation.second);
 }
 
 bool valid_placement(matrix &b, int idx,int x,int y) {
