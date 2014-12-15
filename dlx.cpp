@@ -1,4 +1,5 @@
 #include "dlx.h"
+#include <iostream>
 using namespace std;
 
 pair<header *, vector<header *> > initialize(int num_cols) {
@@ -6,11 +7,12 @@ pair<header *, vector<header *> > initialize(int num_cols) {
   instance.reserve(num_cols);
   header * root = new header();
   for (int i = 0; i < num_cols; ++i) {
-    instance[i] = new header();
-    instance[i]->left = root->left;
-    instance[i]->right = root;
-    root->left->right = instance[i];
-    root->left = instance[i];
+    header * h = new header();
+    instance.push_back(h);
+    h->left = root->left;
+    h->right = root;
+    root->left->right = h;
+    root->left = h;
   }
 
   pair<header *, vector<header *> > result(root, instance);

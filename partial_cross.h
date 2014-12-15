@@ -79,8 +79,8 @@ int** pieces[12] = { (int**) piece1
                    , (int**) piece11
                    , (int**) piece12 };
 
-int piecedims_x[12] = { 3, 2, 3, 3, 3, 4, 3, 5, 4, 3, 4, 3 };
-int piecedims_y[12] = { 3, 3, 3, 3, 3, 2, 3, 1, 2, 2, 2, 3 };
+int piecedims_x[12] = { 3, 3, 3, 3, 3, 2, 3, 1, 2, 2, 2, 3 };
+int piecedims_y[12] = { 3, 2, 3, 3, 3, 4, 3, 5, 4, 3, 4, 3 };
 
 int board_x = 9;
 int board_y = 9;

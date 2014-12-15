@@ -18,8 +18,9 @@ int main(void) {
 
   // Build the grid
   // First, properly set tile flags
-  for(int i = 0; i < num_pieces; ++i) grid[i]->tile = true;
-  cout << "made it" << endl;
+  for(int i = 0; i < num_pieces; ++i){ 
+    grid[i]->tile = true;
+  }
 
   // Next, add rows for placements
   for(int i = 0; i < num_pieces; ++i) {
@@ -27,7 +28,9 @@ int main(void) {
       for(int y = 0; y < board_y; ++y) {
         for (int rotate = 0; rotate < 4; ++rotate) {
           for (int reflect = 0; reflect < 2; ++reflect) {
+            cout << i << " " << x << " " << y << " " << rotate << " " << reflect << endl;
             vector<int> covered = try_placement(i, x, y, rotate, reflect);
+            cout << "haven't segfaulted" << endl;
             if(covered.size() == 0)
               continue;
             auto covered_iter = covered.cbegin();
@@ -42,6 +45,7 @@ int main(void) {
       }
     }
   }
+  cout << "passed for loops" << endl;
 
   // Get count 
   int count = 0;
@@ -71,7 +75,10 @@ int ** get_tile(int idx) {
   int ** tile = make_matrix(dim_x, dim_y);
   for (int i = 0; i < dim_y; ++i) {
     for (int j = 0; j < dim_x; ++j) {
-      tile[i][j] = orig_tile[i][j];
+      cout << i << " " << j << endl;
+      //tile[i][j] = orig_tile[i][j];
+      cout << orig_tile[i][j] << endl;
+      cout << "made it?" << endl;
     }
   }
   return tile;
@@ -109,11 +116,13 @@ int ** rotate(int ** tile, int dim_x, int dim_y) {
 
 tuple<int **,tuple<int, int> > transform_tile(int idx, int _rotate, int _reflect) {
   int ** tile = get_tile(idx);
+  cout << "past get_tile" << endl;
   int dim_x = piecedims_x[idx];
   int dim_y = piecedims_y[idx];
   if (_reflect == 1) {
     tile = reflect(tile, dim_x, dim_y);
   }
+  cout << "past reflect" << endl;
 
   for (int r = 0; r < _rotate; r++) {
     tile = rotate(tile, dim_x, dim_y);
@@ -132,6 +141,7 @@ vector<int> try_placement(int idx, int x, int y, int rotate, int reflect) {
   // If it's valid, return a vector of the parts of the board covered
   // If it isn't valid, return an empty vector
   auto tuple = transform_tile(idx, rotate, reflect);
+  cout << "past transform" << endl;
   int ** tile = get<0>(tuple);
   auto dims = get<1>(tuple);
   int dim_x = get<0>(dims);
