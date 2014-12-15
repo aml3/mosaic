@@ -31,15 +31,31 @@ int main(void) {
           for (int reflect = 0; reflect < 2; ++reflect) {
             //cout << i << " " << x << " " << y << " " << rotate << " " << reflect << endl;
             vector<int> covered = try_placement(i, x, y, rotate, reflect);
-            if(covered.size() == 0)
-              continue;
-            auto covered_iter = covered.cbegin();
+           /* auto covered_iter = covered.cbegin();
+            node * prev_node = nullptr;
             for(int j = 0; j < num_cols; ++j) {
               node * row_node = new node();
               row_node->used = (j == i || j == *covered_iter);
               if(j == *covered_iter) ++covered_iter;
+              row_node->
               grid[j]->insert(row_node);
-            }
+            }*/
+            bool first = true;
+            node * prev = nullptr;
+            for(int j = 0; j < covered.size(); ++j) {
+              node * row_node = new node();
+              if(first) {
+                first = false;
+              }
+              else {
+                row_node->left = prev;
+                row_node->right = prev->right;
+                prev->right->left = row_node;
+                prev->right = row_node;
+              }
+
+              grid[covered[j]]->insert(row_node);
+              prev = row_node;
           }
         }
       }
