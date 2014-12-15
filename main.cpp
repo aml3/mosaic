@@ -7,7 +7,7 @@
 
 using namespace std;
 
-vector<int> try_placement(int idx, int x, int y);
+vector<int> try_placement(int idx, int x, int y, int r, int rr);
 
 int main(void) {
   // Get initial grid
@@ -135,4 +135,26 @@ vector<int> try_placement(int idx, int x, int y, int rotate, int reflect) {
   auto dims = get<1>(tuple);
   int dim_x = get<0>(dims);
   int dim_y = get<1>(dims);
+
+  vector<int> indices;
+  for (int i = 0; i < dim_y; ++i) {
+    for (int j = 0; j < dim_x; ++j) {
+      int board_i = i + y;
+      int board_j = j + x;
+      /* Fell off board. */
+      if (board_i >= board_y || board_j >= board_x) {
+        return vector<int>();
+      }
+
+      /* Mismatch. */
+      if (board[board_i][board_j] != tile[i][j]) {
+        return vector<int>();
+      }
+
+      /* Otherwise, we add the index. */
+      indices.push_back(board_i + board_j * board_x);
+    }
+  }
+
+  return indices;
 }
