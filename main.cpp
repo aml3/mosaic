@@ -22,7 +22,7 @@ int main(void) {
   for (int i = 0; i < board_y; i++) {
     for (int j = 0; j < board_x; j++) {
       if (board[i][j] == 0) {
-        empty_indices.push_back(j + i * board_x);
+        empty_indices.push_back(num_pieces + j + i * board_x);
       }
     }
   }
@@ -41,22 +41,21 @@ int main(void) {
         for (int rotate = 0; rotate < 4; ++rotate) {
           for (int reflect = 0; reflect < 2; ++reflect) {
             vector<int> covered = try_placement(i, x, y, rotate, reflect);
+
+            node * tile_node = new node();
+            tile_node->used = true;
+            grid[i]->insert(tile_node);
+
             if (covered.size() == 0) continue;
 
-            bool first = true;
-            node * prev = nullptr;
+            node * prev = tile_node;
             for(int j = 0; j < covered.size(); ++j) {
               node * row_node = new node();
               row_node->used = true;
-              if(first) {
-                first = false;
-              }
-              else {
-                row_node->left = prev;
-                row_node->right = prev->right;
-                prev->right->left = row_node;
-                prev->right = row_node;
-              }
+              row_node->left = prev;
+              row_node->right = prev->right;
+              prev->right->left = row_node;
+              prev->right = row_node;
 
               grid[covered[j]]->insert(row_node);
               prev = row_node;
@@ -72,13 +71,6 @@ int main(void) {
               grid[empty_indices[z]]->insert(row_node);
               prev = row_node;
             }
-
-            node * tile_node = new node();
-            tile_node->left = prev;
-            tile_node->right = prev->right;
-            prev->right->left = tile_node;
-            prev->right = tile_node;
-            grid[i]->insert(tile_node);
           }
         }
       }
@@ -197,7 +189,7 @@ vector<int> try_placement(int idx, int x, int y, int rotate, int reflect) {
       }
 
       /* Otherwise, we add the index. */
-      indices.push_back(board_i + board_j * board_x);
+      indices.push_back(num_pieces + board_i + board_j * board_x);
     }
   }
 

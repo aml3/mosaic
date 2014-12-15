@@ -23,6 +23,7 @@ header * find_least_full(header * root) {
   header * least = (header *)root->right;
 
   for(header * iter = least; iter != root; iter = (header *)iter->right) {
+    cout << "header count = " << iter->count << endl;
     if(iter->count < least->count)
       least = iter;
   }
