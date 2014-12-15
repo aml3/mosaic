@@ -19,6 +19,7 @@ int main(void) {
   // Build the grid
   // First, properly set tile flags
   for(int i = 0; i < num_pieces; ++i) grid[i]->tile = true;
+  cout << "made it" << endl;
 
   // Next, add rows for placements
   for(int i = 0; i < num_pieces; ++i) {
