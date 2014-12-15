@@ -35,11 +35,13 @@ int main(void) {
   }
 
   // Next, add rows for placements
+  int loop = 0;
   for(int i = 0; i < num_pieces; ++i) {
     for(int x = 0; x < board_x; ++x) {
       for(int y = 0; y < board_y; ++y) {
         for (int rotate = 0; rotate < 4; ++rotate) {
           for (int reflect = 0; reflect < 2; ++reflect) {
+            loop++;
             vector<int> covered = try_placement(i, x, y, rotate, reflect);
 
             node * tile_node = new node();
@@ -77,7 +79,7 @@ int main(void) {
     }
   }
 
-  cout << "passed for loops" << endl;
+  cout << "passed for loops " << loop << endl;
 
   // Get count 
   int count = 0;
