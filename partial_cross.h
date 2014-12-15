@@ -3,9 +3,11 @@
 
 #include <vector>
 using namespace std;
+typdef vector<vector<int > > tile;
+typedef vector<int> row;
 
-vector<vector<int> > piece1 = {
-  vector<int>({1, 1, 1}),
+tile piece1 = {
+  row({1, 1, 1}),
   vector<int>({0, 1, 0}),
   vector<int>({0, 1, 0}) };
 
